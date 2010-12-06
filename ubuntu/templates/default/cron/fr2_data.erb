@@ -2,8 +2,8 @@
 # retrieving the xml data, etc from the gpo
 
 # Import today's content
-# retries every 5 minutes from 4AM EDT to 2PM every day
-0,5,10,15,20,25,30,35,40,45,50,55 8-18 	* * *	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH data:daily >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/cron.log  2>&1
+# retries every 5 minutes from 4AM to 5PM EDT every day
+0,5,10,15,20,25,30,35,40,45,50,55 8-21 	* * *	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH data:daily >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/cron.log  2>&1
 
 # Find the matching regulations.gov URL for articles
 # runs every 30 minutes from 7AM EDT until 5PM M-F
