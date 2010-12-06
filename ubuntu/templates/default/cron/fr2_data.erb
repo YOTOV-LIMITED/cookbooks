@@ -11,7 +11,7 @@
 
 # Expire pages warning of late content at 9AM
 # runs at 9AM EDT M-F
-0 13 	* * 1-5	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH varnish:expire:pages_warning_of_late_content >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/cron.log  2>&1
+0 13,14 	* * 1-5	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH varnish:expire:pages_warning_of_late_content >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/cron.log  2>&1
 
 # Reindex the entire content (collapsing delta indexes back into main index)
 # runs once a week on Saturday at 3AM EDT
