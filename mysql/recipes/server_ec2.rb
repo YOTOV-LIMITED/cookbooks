@@ -85,8 +85,28 @@ if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles
       group "adm"
     end
   end
+
+  # we're using ebs backed images which have a small volume - so we mount this to the
+  # non-persistent /mnt volume for added space.
+  # mysql uses /tmp for temporary tables.
+  directory "/mnt/tmp" do
+    owner "root"
+    group "root"
+    action :create
+  end
   
+  mount "/tmp" do
+    device "/mnt/tmp"
+    fstype "none"
+    options "bind"
+    action [:enable, :mount]
+    # Do not execute if its already mounted (ubunutu/linux only)
+    not_if "cat /proc/mounts | grep /tmp"
+  end
+  
+
   service "mysql" do
     action :start
   end
+
 end
