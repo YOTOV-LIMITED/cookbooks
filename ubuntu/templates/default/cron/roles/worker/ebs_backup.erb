@@ -1,0 +1,10 @@
+# /etc/cron.d/ebs_backup: crontab fragment for backing up
+# files on the attached EBS volume
+# This also removes the last 5 old snapshots from AWS
+
+# to snapshot your ebs file_system
+0 8 	* * *   root    /usr/bin/ec2-consistent-snapshot --xfs-filesystem <%=@xfs_mount_point%> --description <%=@description%> <%=@ebs_volume_id%> >> <%=@log%>  2>&1
+
+# Delete the last 5 old snapshots. (keeps 10)
+# This relies on .awssecret being present in /mnt and symlinked to /root/.awssecret (it should contain "aws_accesskey \n aws_secretkey")
+0 10 	* * *   root    /usr/local/sbin/aws dsnap | grep <%=@ebs_volume_id%> | sort -r -k 5  | sed 1,10d | awk '{print "Deleting snapshot: " $2 " Dated: " $8}; system("/usr/local/sbin/aws delsnap " $2)'  >> <%=@log%>  2>&1

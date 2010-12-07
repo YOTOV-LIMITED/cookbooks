@@ -218,6 +218,9 @@ if node[:ec2]
   # Needed to remove old snapshots from amazon
   # Relies on .awssecret being present in /mnt and 
   # symlinked to /root/.awssecret
+  
+  # see http://www.capsunlock.net/2009/10/deleting-old-ebs-snapshots.html for more
+  
   template "/mnt/.awssecret" do
     variables :accesskey => node[:aws][:accesskey], :secretkey => node[:aws][:secretkey]
     source "awssecret.erb"
@@ -227,17 +230,39 @@ if node[:ec2]
   link "/root/.awssecret" do
     to "/mnt/.awssecret"
   end
+  
+  
+  unless File.exists?("/usr/local/sbin/aws")
+    remote_file "/usr/local/sbin/aws" do
+      source "https://github.com/timkay/aws/raw/master/aws"
+      mode "0744"
+    end
+  end
+  
 
-  # template "/etc/cron.d/ebs_backup" do
-  #     variables :ebs_volume_id => node[:aws][:ebs][:volume_id],
-  #               :mysql_user    => 'root', 
-  #               :mysql_passwd  => node[:mysql][:server_root_password],
-  #               :description   => node[:apache][:name],
-  #               :log           => node[:ubuntu][:backup_log_dir],
-  #               :roles         => node[:chef][:roles]
-  #     source "cron/ebs_backup.erb"
-  #     mode 0644
-  #   end
+  if node[:rails][:environment] == 'production'
+    if node[:chef][:roles].include?('database')
+      template "/etc/cron.d/ebs_backup" do
+        variables :ebs_volume_id   => node[:aws][:ebs][:database][:volume_id],
+                  :mysql_user      => 'root', 
+                  :mysql_passwd    => node[:mysql][:server_root_password],
+                  :xfs_mount_point => node[:aws][:ebs][:database][:mount_point],
+                  :description     => "database-#{node[:apache][:name]}-#{node[:rails][:environment]}",
+                  :log             => node[:ubuntu][:backup_log_dir],
+        source "cron/roles/database/ebs_backup.erb"
+        mode 0644
+      end
+    elsif node[:chef][:roles].include?('worker')
+      template "/etc/cron.d/ebs_backup" do
+        variables :ebs_volume_id   => node[:aws][:ebs][:worker][:volume_id],
+                  :xfs_mount_point => node[:aws][:ebs][:worker][:mount_point],
+                  :description     => "worker-#{node[:apache][:name]}-#{node[:rails][:environment]}",
+                  :log             => node[:ubuntu][:backup_log_dir],
+        source "cron/roles/worker/ebs_backup.erb"
+        mode 0644
+      end
+    end
+  end
   
   execute "Get Amazon private key" do
     cwd "/mnt"
