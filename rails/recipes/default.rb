@@ -40,17 +40,10 @@ directory "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/current/publi
   recursive true
 end
 
-if node[:chef][:roles].include?('staging')
+if node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
   template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
-    variables :host          => node[:ubuntu][:database][:fqdn],
-              :password      => node[:mysql][:server_root_password],
-              :database_name => node[:mysql][:database_name]
-    source "staging.database.yml.erb"
-    mode 0644
-  end
-elsif node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
-    variables :host          => node[:ubuntu][:database][:fqdn], 
+    variables :environment   => node[:rails][:environment],
+              :host          => node[:ubuntu][:database][:fqdn], 
               :port          => node[:mysql][:server_port],
               :database_name => node[:mysql][:database_name],
               :password      => node[:mysql][:server_root_password]
