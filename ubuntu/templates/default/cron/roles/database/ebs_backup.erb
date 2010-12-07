@@ -4,7 +4,6 @@
 
 # to snapshot your mysql && ebs file_system
 0 8 	* * *   root    /usr/bin/ec2-consistent-snapshot --mysql --mysql-username <%=@mysql_user%> --mysql-password <%=@mysql_passwd%> --xfs-filesystem <%=@xfs_mount_point%> --description <%=@description%> <%=@ebs_volume_id%> >> <%=@log%>  2>&1
-<% else -%>
 
 # Delete the last 5 old snapshots. (keeps 10)
 # This relies on .awssecret being present in /mnt and symlinked to /root/.awssecret (it should contain "aws_accesskey \n aws_secretkey")
