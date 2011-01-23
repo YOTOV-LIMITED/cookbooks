@@ -1,0 +1,17 @@
+database:
+  name: <%= @database_name %>
+  user: <%= @database_user %>
+  password: <%= @password %>
+  host: <%= @host %>
+  port: <%= @port %>
+  charset: utf8
+  collate:
+wordpress:
+  auth_key: '<%= @wordpress_keys[:auth_key] %>'
+  secure_auth_key: '<%= @wordpress_keys[:secure_auth_key] %>'
+  logged_in_key: '<%= @wordpress_keys[:logged_in_key] %>'
+  nonce_key: '<%= @wordpress_keys[:nonce_key] %>'
+  auth_salt: '<%= @wordpress_keys[:auth_salt] %>'
+  secure_auth_salt: '<%= @wordpress_keys[:secure_auth_salt] %>'
+  logged_in_salt: '<%= @wordpress_keys[:logged_in_salt] %>'
+  nonce_salt: '<%= @wordpress_keys[:nonce_salt] %>'
