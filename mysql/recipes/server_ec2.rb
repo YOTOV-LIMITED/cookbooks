@@ -92,6 +92,7 @@ if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles
   directory "/mnt/tmp" do
     owner "root"
     group "root"
+    mode 0777
     action :create
   end
   
