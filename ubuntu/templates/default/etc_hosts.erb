@@ -1,5 +1,9 @@
 127.0.0.1 localhost
 
+<% if @node[:chef][:roles].include?('vagrant') %>
+127.0.0.1 vagrant-karmic.local vagrant-karmic
+<% end %>
+
 # auto generated for fr2 internal usage
 <%= @proxy_server_ip  %> <%= @proxy_server_fqdn  %> <%= @proxy_server_alias  %>
 <%= @static_server_ip %> <%= @static_server_fqdn %> <%= @static_server_alias %>
