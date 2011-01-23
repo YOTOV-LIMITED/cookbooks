@@ -40,10 +40,10 @@ if node[:ec2]
     notifies :run, resources(:execute => "apt-get update"), :immediately
     source "apt/alestic-ppa.list.erb"
   end
-  execute "add apt signature keys for alestic ppa" do
-    command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
-    user 'root'
-  end
+  # execute "add apt signature keys for alestic ppa" do
+  #   command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
+  #   user 'root'
+  # end
   
   # xfs file system tools (for EBS volumes)
   package 'xfsprogs' do
@@ -64,6 +64,9 @@ end
 # Add libraries we'll need
 #
 ####################################
+
+# vim
+package "vim"
 
 # varnish
 package "libpcre3-dev" do
