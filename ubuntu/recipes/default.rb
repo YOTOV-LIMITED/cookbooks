@@ -387,3 +387,18 @@ remote_file "/etc/ssh/ssh_config" do
   action :create
   notifies :restart, resources(:service => "ssh")
 end
+
+if node[:chef][:roles].include?('blog') 
+  template "#{node[:app][:blog_root]}/config/wp-config.yml" do
+    source "wp-config.yml.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables :host           => node[:ubuntu][:database][:fqdn], 
+              :port           => node[:mysql][:server_port],
+              :database_name  => node[:wordpress][:database_name],
+              :database_user  => node[:wordpress][:database_user],
+              :password       => node[:wordpress][:database_password],
+              :wordpress_keys => node[:wordpress][:keys]
+  end
+end

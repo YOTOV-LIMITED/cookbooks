@@ -1,7 +1,7 @@
 127.0.0.1 localhost
 
 <% if @node[:chef][:roles].include?('vagrant') %>
-127.0.0.1 vagrant-karmic.local vagrant-karmic
+  127.0.0.1 <%= @node[:fqdn] %> <%= @node[:hostname] %>
 <% end %>
 
 # auto generated for fr2 internal usage
