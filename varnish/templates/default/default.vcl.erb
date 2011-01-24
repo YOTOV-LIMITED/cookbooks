@@ -13,10 +13,10 @@ backend app_server_<%= i+1 %> {
 <% end %>
 
 <% if @node[:varnish][:blog_proxy_host] %>
-  backend blog_server {
-    .host = "<%= @node[:varnish][:blog_proxy_host] %>";
-    .port = "<%= @node[:varnish][:blog_proxy_port] %>";
-  }
+backend blog_server {
+  .host = "<%= @node[:varnish][:blog_proxy_host] %>";
+  .port = "<%= @node[:varnish][:blog_proxy_port] %>";
+}
 <% end %>
 
 <% if @node[:chef][:roles].include?('proxy') %>
@@ -54,16 +54,21 @@ sub vcl_recv {
   
     # set the backend server based on request (if multi-server stack)
   <% if @node[:chef][:roles].include?('proxy') %>
-    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html)") {
+    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html|/uploads)") {
       set req.backend = static_server;
       return (lookup);
     <% if @node[:varnish][:blog_proxy_host] %>
     # logged in users must always pass
-    }else if( req.url ~ "^/wp-(login|admin)" || req.http.Cookie ~ "wordpress_logged_in_" ){
+    }else if( req.url ~ "^/wp-(login|admin)" ){
         set req.backend = blog_server;
         return (pass);
     } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/wp-)") {
         set req.backend = blog_server;
+        
+        # Don't cache wordpress pages if logged in to wp
+        if (req.http.Cookie ~ "wordpress_logged_in_" || req.http.Cookie ~ "comment_author_") {
+            return (pass);
+        }
     <% end %>
     } else {
       set req.backend = app_director;
