@@ -1,0 +1,23 @@
+--- 
+home: 
+  autoload: "yes"
+  option_value: <%= @app_url %>
+siteurl: 
+  autoload: "yes"
+  option_value: <%= @app_url %>
+upload_path: 
+  autoload: "yes"
+  option_value: <%= @upload_path %>
+wpv_clients: 
+  autoload: "yes"
+  option_value: <%= @varnish_server %>:<%= @varnish_port %>
+wpv_enabled: 
+  autoload: "yes"
+  option_value: "1"
+wpv_host_pattern: 
+  autoload: "yes"
+  option_value: <%= @app_url.gsub('http://', '').gsub(/\./, "\\\\\\\\.") %>$
+wpv_secrets: 
+  autoload: "yes"
+  option_value: ""
+  
