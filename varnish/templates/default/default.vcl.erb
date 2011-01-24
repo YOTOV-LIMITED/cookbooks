@@ -62,7 +62,7 @@ sub vcl_recv {
     }else if( req.url ~ "^/wp-(login|admin)" || req.http.Cookie ~ "wordpress_logged_in_" ){
         set req.backend = blog_server;
         return (pass);
-    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/wp-)") {
+    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/wp-)") {
         set req.backend = blog_server;
     <% end %>
     } else {
@@ -114,7 +114,7 @@ sub vcl_fetch {
     
     <% if @node[:varnish][:blog_proxy_host] %>
     # WP doesn't set these so we're doing it here to make sure it stays in the cache
-    if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/wp-)") {
+    if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/wp-)") {
       set beresp.ttl = 24h;
     }
     <% end %>
