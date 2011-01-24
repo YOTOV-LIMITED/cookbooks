@@ -41,13 +41,13 @@ define :cap_setup, :path => nil, :owner => "root", :group => "root", :appowner =
   end
   
   if node[:ec2] && node[:chef][:roles].include?('staging')
-    mount "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared" do
+    mount "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared" do
       device "/vol/apps/#{node[:apache][:name]}/shared"
       fstype "none"
       options "bind"
       action [:enable, :mount]
       # Do not execute if its already mounted (ubunutu/linux only)
-      not_if "cat /proc/mounts | grep #{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}"
+      not_if "cat /proc/mounts | grep #{node[:app][:web_dir]}/apps/#{node[:app][:name]}"
     end
 
     # we really only want to do this if it's not already owned...

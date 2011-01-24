@@ -7,10 +7,10 @@ staging:
   mem_limit: <%= @memory_limit %>
   version: <%= @version %>
   <% end %>
-  searchd_log_file: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/log/searchd.log
-  query_log_file: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/log/searchd.query.log
-  pid_file: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/tmp/searchd.pid
-  searchd_file_path: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/db/sphinx/production
+  searchd_log_file: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/log/searchd.log
+  query_log_file: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/log/searchd.query.log
+  pid_file: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/tmp/searchd.pid
+  searchd_file_path: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/db/sphinx/production
 
 production:
   morphology: stem_en
@@ -21,7 +21,7 @@ production:
   mem_limit: <%= @memory_limit %>
   version: <%= @version %>
   <% end %>
-  searchd_log_file: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/log/searchd.log
-  query_log_file: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/log/searchd.query.log
-  pid_file: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/tmp/searchd.pid
-  searchd_file_path: <%=node[:apache][:web_dir]%>/apps/<%=node[:apache][:name]%>/shared/db/sphinx/production
+  searchd_log_file: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/log/searchd.log
+  query_log_file: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/log/searchd.query.log
+  pid_file: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/tmp/searchd.pid
+  searchd_file_path: <%=node[:app][:web_dir]%>/apps/<%=node[:app][:name]%>/shared/db/sphinx/production

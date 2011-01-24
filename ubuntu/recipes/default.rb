@@ -294,7 +294,7 @@ end
 
 if node[:chef][:roles].include?('worker') || node[:chef][:roles].include?('staging')
   template "/etc/cron.d/fr2_data" do
-    variables :apache_web_dir => node[:apache][:web_dir], 
+    variables :apache_web_dir => node[:app][:web_dir], 
               :app_name       => node[:apache][:name], 
               :rails_env      => node[:rails][:environment],
               :run_user       => node[:capistrano][:deploy_user]
@@ -401,4 +401,29 @@ if node[:chef][:roles].include?('blog')
               :password       => node[:wordpress][:database_password],
               :wordpress_keys => node[:wordpress][:keys]
   end
+  
+  template "#{node[:app][:blog_root]}/config/wp-options.local.yml" do
+    source "wp-options.local.yml.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables :app_url => "http://www.#{node[:app][:url]}",
+              :upload_path => "#{node[:app][:app_root]}/shared/uploads",
+              :varnish_server => "proxy.fr2.ec2.internal",
+              :varnish_port => node[:varnish][:admin_listen_port]
+  end
+  
+  directory "#{node[:app][:app_root]}/shared/uploads" do
+    owner 'root'
+    group 'www-data'
+    mode 0775
+    recursive true
+    action :create
+    not_if { File.directory?("#{node[:app][:app_root]}/shared/uploads") }
+  end
+  
+  link "#{node[:app][:app_root]}/current/public/uploads" do
+    to "#{node[:app][:app_root]}/shared/uploads"
+  end
+  
 end
