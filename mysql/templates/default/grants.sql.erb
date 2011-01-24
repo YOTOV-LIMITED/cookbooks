@@ -5,8 +5,15 @@
 <% when "debian","ubuntu" -%>
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, SHUTDOWN, PROCESS, FILE, REFERENCES, INDEX, ALTER, SHOW DATABASES, SUPER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY '<%= @node[:mysql][:server_debian_password] %>' WITH GRANT OPTION;
 <% end -%>
+
 # Grant replication for a slave user.
 GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%' identified by '<%= @node[:mysql][:server_repl_password] %>';
+
+# Create wordpress database
+CREATE DATABASE IF NOT EXISTS <%= @node[:wordpress][:database_name] %>;
+
+# Create the wordpress user and grant permissions
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER ON <%= @node[:wordpress][:database_name] %>.* TO '<%= @node[:wordpress][:database_user] %>' IDENTIFIED BY '<%= @node[:wordpress][:database_password] %>';
 
 # Set the server root password. This should be preseeded by the package installation.
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('<%= @node[:mysql][:server_root_password] %>');
