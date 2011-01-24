@@ -6,7 +6,11 @@
   
   <Directory <%= @node[:apache][:docroot] %>>
     Options FollowSymLinks
+    <%- if @node[:chef][:roles].include?('blog') -%>
+    AllowOverride all
+    <%- else -%>
     AllowOverride None
+    <%- end -%>
     Order allow,deny
     Allow from all
   </Directory>
@@ -29,9 +33,9 @@
   CustomLog <%= @node[:apache][:log_dir] %>/<%= @node[:apache][:name] %>-access.log custom
 
   RewriteEngine On
-  RewriteLog <%= @node[:apache][:log_dir] %>/<%= @application_name %>-rewrite.log
+  RewriteLog <%= @node[:apache][:log_dir] %>/<%= @node[:apache][:name] %>-rewrite.log
   RewriteLogLevel 0
-
+  
   # Canonical host, <%= @node[:apache][:server_name] %>
   # RewriteCond %{HTTP_HOST}   !^<%= @node[:apache][:server_name] %> [NC]
   # RewriteCond %{HTTP_HOST}   !^$
@@ -40,4 +44,14 @@
   RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
   RewriteCond %{SCRIPT_FILENAME} !maintenance.html
   RewriteRule ^.*$ /system/maintenance.html [L]
+  
+  <% if @node[:chef][:roles].include?('blog') %>
+  # wordpress blog
+  #RewriteRule ^blog\/search(.*) /index.php [P]
+
+  #RewriteRule ^index\.php$ - [L]
+  #RewriteCond %{REQUEST_FILENAME} !-f
+  #RewriteCond %{REQUEST_FILENAME} !-d
+  #RewriteRule . /index.php [L]
+  <% end %>
 </VirtualHost>
