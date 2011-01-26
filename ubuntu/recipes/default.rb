@@ -116,7 +116,7 @@ end
 
 group "mysql" do
   gid 1100
-  not_if "cat /etc/group | grep deploy"
+  not_if "cat /etc/group | grep mysql"
 end
 
 group "deploy" do
@@ -408,22 +408,23 @@ if node[:chef][:roles].include?('blog')
     group "root"
     mode 0644
     variables :app_url => "http://www.#{node[:app][:url]}",
-              :upload_path => "#{node[:app][:app_root]}/shared/uploads",
               :varnish_server => "proxy.fr2.ec2.internal",
               :varnish_port => node[:varnish][:admin_listen_port]
   end
   
-  directory "#{node[:app][:app_root]}/shared/uploads" do
-    owner 'root'
-    group 'www-data'
-    mode 0775
-    recursive true
-    action :create
-    not_if { File.directory?("#{node[:app][:app_root]}/shared/uploads") }
-  end
-  
-  link "#{node[:app][:app_root]}/current/public/uploads" do
-    to "#{node[:app][:app_root]}/shared/uploads"
+  if node[:chef][:roles].include?('worker') && node[:chef][:roles].include?('blog')
+    directory "#{node[:apache][:docroot]}/wp-content/uploads" do
+      owner 'www-data'
+      group 'www-data'
+      mode 0755
+      recursive true
+      action :create
+    end
+    
+    link "#{node[:app][:app_root]}/current/public/uploads" do
+      to "#{node[:apache][:docroot]}/wp-content/uploads"
+      group 'www-data'
+    end
   end
   
 end

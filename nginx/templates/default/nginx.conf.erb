@@ -96,7 +96,7 @@ http {
        proxy_intercept_errors on;
     }
     
-    location ~* ^(/images|/javascripts|/stylesheets) {
+    location ~* ^(/images|/javascripts|/stylesheets|/uploads) {
        expires 1y;
        
        proxy_pass             http://varnish;
