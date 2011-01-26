@@ -193,10 +193,10 @@ http {
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
     # redirect www
-    if ($host ~* www\.(.*)) {
-      set $host_without_www $1;
-      rewrite ^(.*)$ https://$host_without_www$1 permanent; # $1 contains '/foo', not 'www.mydomain.com/foo'
-    }
+    # if ($host ~* www\.(.*)) {
+    #   set $host_without_www $1;
+    #   rewrite ^(.*)$ https://$host_without_www$1 permanent; # $1 contains '/foo', not 'www.mydomain.com/foo'
+    # }
     
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-error.log;
