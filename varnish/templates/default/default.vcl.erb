@@ -65,6 +65,10 @@ sub vcl_recv {
     } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/wp-)") {
         set req.backend = blog_server;
         
+        if (req.url ~ "^(/wp-)") {
+          return (pass);
+        }
+        
         # Don't cache wordpress pages if logged in to wp
         if (req.http.Cookie ~ "wordpress_logged_in_" || req.http.Cookie ~ "comment_author_") {
             return (pass);
