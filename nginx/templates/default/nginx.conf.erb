@@ -177,6 +177,10 @@ http {
       location = /404_static.html {  
           root  <%= @node[:nginx][:doc_root] %>;  
       }
+      error_page 403  /403_static.html;  
+      location = /403_static.html {  
+          root  <%= @node[:nginx][:doc_root] %>;  
+      }
     <% end %>
   }
   
