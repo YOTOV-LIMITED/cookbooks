@@ -15,3 +15,5 @@ wordpress:
   secure_auth_salt: '<%= @wordpress_keys[:secure_auth_salt] %>'
   logged_in_salt: '<%= @wordpress_keys[:logged_in_salt] %>'
   nonce_salt: '<%= @wordpress_keys[:nonce_salt] %>'
+  force_ssl_login: <%= @wordpress_keys[:force_ssl_login] %>
+  force_ssl_admin: <%= @wordpress_keys[:force_ssl_admin] %>
