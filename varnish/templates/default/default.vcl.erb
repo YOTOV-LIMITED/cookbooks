@@ -59,15 +59,11 @@ sub vcl_recv {
       return (lookup);
     <% if @node[:varnish][:blog_proxy_host] %>
     # logged in users must always pass
-    }else if( req.url ~ "^/wp-(login|admin)" ){
+    }else if( req.url ~ "^/blog/wp-(login|admin)" ){
         set req.backend = blog_server;
         return (pass);
-    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/wp-)") {
+    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list)") {
         set req.backend = blog_server;
-        
-        if (req.url ~ "^(/wp-)") {
-          return (pass);
-        }
         
         # Don't cache wordpress pages if logged in to wp
         if (req.http.Cookie ~ "wordpress_logged_in_" || req.http.Cookie ~ "comment_author_") {
