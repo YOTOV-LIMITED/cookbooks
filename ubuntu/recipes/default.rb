@@ -413,7 +413,7 @@ if node[:chef][:roles].include?('blog')
   end
   
   if node[:chef][:roles].include?('worker') && node[:chef][:roles].include?('blog')
-    directory "#{node[:apache][:docroot]}/wp-content/uploads" do
+    directory "#{node[:apache][:docroot]}/blog/wp-content/uploads" do
       owner 'www-data'
       group 'www-data'
       mode 0755
@@ -422,7 +422,7 @@ if node[:chef][:roles].include?('blog')
     end
     
     link "#{node[:app][:app_root]}/current/public/uploads" do
-      to "#{node[:apache][:docroot]}/wp-content/uploads"
+      to "#{node[:apache][:docroot]}/blog/wp-content/uploads"
       group 'www-data'
     end
   end
