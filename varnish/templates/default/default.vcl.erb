@@ -33,6 +33,15 @@ director app_director round-robin {
 <% end %>
 
 sub vcl_recv {
+    <% if @node[:varnish][:blog_proxy_host] %>
+    # Rewrite top-level wordpress requests to /blog/
+    set req.url = regsub(
+        req.url,
+        "^/(learn|policy|layout/footer_page_list|layout/homepage_post_list)",
+        "/blog/\1"
+    );
+    <% end %>
+    
     # Reject Non-RFC2616 or CONNECT or TRACE requests.
     if (req.request != "GET" &&
       req.request != "HEAD" &&
