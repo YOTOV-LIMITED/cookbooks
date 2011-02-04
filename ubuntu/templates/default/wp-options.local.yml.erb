@@ -14,6 +14,9 @@ wpv_enabled:
 wpv_host_pattern: 
   autoload: "yes"
   option_value: <%= @app_url.gsub('http://', '').gsub(/\./, "\\\\\\\\.") %>$
+wpv_path: 
+  autoload: "yes"
+  option_value: /blog
 wpv_secrets: 
   autoload: "yes"
   option_value: ""
