@@ -407,7 +407,7 @@ if node[:chef][:roles].include?('blog')
     owner "root"
     group "root"
     mode 0644
-    variables :app_url => "http://www.#{node[:app][:url]}",
+    variables :app_url => "http://www.#{node[:app][:url]}/blog/",
               :varnish_server => "proxy.fr2.ec2.internal",
               :varnish_port => node[:varnish][:admin_listen_port]
   end
