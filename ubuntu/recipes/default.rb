@@ -295,7 +295,7 @@ end
 if node[:chef][:roles].include?('worker') || node[:chef][:roles].include?('staging')
   template "/etc/cron.d/fr2_data" do
     variables :apache_web_dir => node[:app][:web_dir], 
-              :app_name       => node[:apache][:name], 
+              :app_name       => node[:app][:name], 
               :rails_env      => node[:rails][:environment],
               :run_user       => node[:capistrano][:deploy_user]
     source "cron/fr2_data.erb"
