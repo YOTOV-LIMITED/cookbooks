@@ -111,6 +111,10 @@ http {
     }
     <% end %>
     
+    location /OFRUpload {
+      rewrite ^/(OFRUpload($|/.*)) http://www.ofr.gov/$1  permanent;
+    }
+    
     location / {
       <% if @node[:nginx][:varnish_proxy] %>
       # ofr redirects for old pages
