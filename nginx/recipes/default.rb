@@ -54,7 +54,7 @@ end
 
 # add location for varnish errors if it happens to go down
 # or can't reach the app servers
-if node[:chef][:roles].include?('proxy')
+if node[:chef][:roles].include?('proxy') && !node[:chef][:roles].include?('vagrant')
   directory "/var/www/apps/fr2/current/public/nginx" do
     action :create
     recursive true

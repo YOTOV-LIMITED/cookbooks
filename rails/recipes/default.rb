@@ -96,15 +96,17 @@ execute "bundle install" do
   group "#{node[:capistrano][:deploy_user]}"
   action :nothing
 end
- 
-%w(Gemfile Gemfile.lock).each do |f|
-  template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
-    source "#{f}"
-    notifies :run, resources(:execute => "bundle install")
-  end
+
+unless node[:chef][:roles].include?('vagrant')
+  %w(Gemfile Gemfile.lock).each do |f|
+    template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
+      source "#{f}"
+      notifies :run, resources(:execute => "bundle install")
+    end
   
-  file "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
-    owner "#{node[:capistrano][:deploy_user]}"
-    group "#{node[:capistrano][:deploy_user]}"
+    file "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
+      owner "#{node[:capistrano][:deploy_user]}"
+      group "#{node[:capistrano][:deploy_user]}"
+    end
   end
 end
