@@ -20,10 +20,11 @@
 
 package "postfix" do
   action :install
+  response_file 'postfix.preseed'
 end
 
 service "postfix" do
-  action :enable
+  #action :enable
 end
 
 %w{main master}.each do |cfg|
