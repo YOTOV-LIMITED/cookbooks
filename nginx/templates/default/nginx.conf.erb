@@ -209,6 +209,10 @@ http {
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-error.log;
     
+    location /robots.txt {
+      root  <%= @node[:nginx][:doc_root] %>;
+    }
+
     location / {
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
