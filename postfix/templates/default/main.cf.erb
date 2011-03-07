@@ -16,6 +16,7 @@ smtp_sasl_password_maps = <%= @node[:postfix][:smtp_sasl_password_maps] %>
 smtp_sasl_security_options = <%= @node[:postfix][:smtp_sasl_security_options] %>
 smtp_tls_CAfile = <%= @node[:postfix][:smtp_tls_cafile] %>
 smtp_use_tls = <%= @node[:postfix][:smtp_use_tls] %>
+smtp_tls_security_level = <%= @node[:postfix][:smtp_tls_security_level] %>
 <% end -%>
 myhostname = <%= @node[:postfix][:myhostname] %>
 mydomain = <%= @node[:postfix][:mydomain] %>
@@ -31,7 +32,8 @@ inet_interfaces = all
 <% else -%>
 relayhost = <%= @node[:postfix][:relayhost] %>
 mynetworks = <%= @node[:postfix][:mail_relay_networks] %>
-inet_interfaces = loopback-only
+inet_interfaces = <%= @node[:postfix][:inet_interfaces] %>
 <% end -%>
+header_size_limit = <%= @node[:postfix][:header_size_limit] %>
 mailbox_size_limit = 0
 recipient_delimiter = +
