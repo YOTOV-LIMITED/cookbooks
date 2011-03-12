@@ -242,6 +242,14 @@ if node[:ec2]
     end
   end
   
+  directory "/opt/backups/scripts" do
+    owner 'root'
+    group 'root'
+    mode 0744
+    recursive true
+    action :create
+    not_if do File.directory?("/opt/backups/scripts") end
+  end 
 
   if node[:rails][:environment] == 'production'
     if node[:chef][:roles].include?('database')
@@ -254,6 +262,20 @@ if node[:ec2]
                   :log             => node[:ubuntu][:backup_log_dir]
         source "cron/roles/database/ebs_backup.erb"
         mode 0644
+      end
+      
+      template "/opt/backups/scripts/email_feature_backup.rb" do
+        variables :mysql_user      => 'root', 
+                  :mysql_passwd    => node[:mysql][:server_root_password],
+        source "cron/roles/database/email_feature_backup.erb"
+        mode 0744
+      end
+      
+      template "/opt/backups/scripts/wordpress_backup.rb" do
+        variables :mysql_user      => node[:wordpress][:database_user], 
+                  :mysql_passwd    => node[:wordpress][:database_password],
+        source "cron/roles/database/wordpress_backup.erb"
+        mode 0744
       end
     elsif node[:chef][:roles].include?('worker')
       template "/etc/cron.d/ebs_backup" do

@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+database    = "fr2_wordpress"
+tables      = %w()
+backup_dir  = "/opt/backups"
+backup_file = "wordpress_backup_#{Time.now.strftime('%Y_%m_%d_%T').gsub(':','_')}.sql"
+
+`mysqldump -u#{@mysql_user} -p#{@mysql_passwd} #{database} #{tables.join(' ')}  --opt --quick > #{backup_dir}/#{backup_file} && #{@s3sync_install_path}/s3sync/s3cmd.rb put #{backup_dir}/#{backup_file} backups.internal.federalregister.gov:mysql/#{backup_file}`
