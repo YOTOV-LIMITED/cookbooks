@@ -19,6 +19,15 @@
     Options FollowSymLinks
     AllowOverride None
   </Directory>
+  
+  <% if @node[:chef][:roles].include?('blog') -%>
+  <Directory <%= @node[:apache][:docroot] %>/blog/wp-admin>
+    AuthType Basic
+    AuthName "Restricted Access"
+    AuthUserFile /etc/apache2/passwd/passwords
+    Require user fr2wordpress
+  </Directory>
+  <% end -%>
 
   <Location /server-status>
     SetHandler server-status

@@ -68,12 +68,12 @@ http {
       rewrite  ^/(admin($|/.*))  https://<%= @node[:nginx][:host_name] %>/$1  permanent;
     }
     
-    location /wp-admin {
-      rewrite ^/(wp-admin($|/.*)) https://<%= @node[:nginx][:host_name] %>/$1  permanent;
+    location /blog/wp-admin {
+      rewrite ^/(blog\/wp-admin($|/.*)) https://<%= @node[:nginx][:host_name] %>/$1  permanent;
     }
     
-    location /wp-login {
-      rewrite ^/(wp-login($|/.*)) https://<%= @node[:nginx][:host_name] %>/$1  permanent;
+    location /blog/wp-login {
+      rewrite ^/(blog\/wp-login($|/.*)) https://<%= @node[:nginx][:host_name] %>/$1  permanent;
     }
     <% end %>
     
