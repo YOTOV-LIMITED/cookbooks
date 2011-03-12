@@ -266,14 +266,14 @@ if node[:ec2]
       
       template "/opt/backups/scripts/email_feature_backup.rb" do
         variables :mysql_user      => 'root', 
-                  :mysql_passwd    => node[:mysql][:server_root_password],
+                  :mysql_passwd    => node[:mysql][:server_root_password]
         source "cron/roles/database/email_feature_backup.erb"
         mode 0744
       end
       
       template "/opt/backups/scripts/wordpress_backup.rb" do
         variables :mysql_user      => node[:wordpress][:database_user], 
-                  :mysql_passwd    => node[:wordpress][:database_password],
+                  :mysql_passwd    => node[:wordpress][:database_password]
         source "cron/roles/database/wordpress_backup.erb"
         mode 0744
       end
