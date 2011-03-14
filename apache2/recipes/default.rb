@@ -229,6 +229,12 @@ if node[:ec2] && (node[:chef][:roles].include?('staging') || node[:chef][:roles]
   end
 end
 
+if node[:chef][:roles].include?('blog')
+  directory '/etc/apache2/passwd' do
+    mode 0755
+    action :create
+  end
+end
 
 
 service "apache2" do

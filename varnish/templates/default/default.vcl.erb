@@ -12,6 +12,13 @@ backend app_server_<%= i+1 %> {
 }
 <% end %>
 
+<% if @node[:varnish][:blog_proxy_host] %>
+backend blog_server {
+  .host = "<%= @node[:varnish][:blog_proxy_host] %>";
+  .port = "<%= @node[:varnish][:blog_proxy_port] %>";
+}
+<% end %>
+
 <% if @node[:chef][:roles].include?('proxy') %>
 backend static_server {
   .host = "<%= @node[:varnish][:static_proxy_host] %>";
@@ -26,6 +33,15 @@ director app_director round-robin {
 <% end %>
 
 sub vcl_recv {
+    <% if @node[:varnish][:blog_proxy_host] %>
+    # Rewrite top-level wordpress requests to /blog/
+    set req.url = regsub(
+        req.url,
+        "^/(learn|policy|layout/footer_page_list|layout/homepage_post_list)",
+        "/blog/\1"
+    );
+    <% end %>
+    
     # Reject Non-RFC2616 or CONNECT or TRACE requests.
     if (req.request != "GET" &&
       req.request != "HEAD" &&
@@ -46,12 +62,23 @@ sub vcl_recv {
     set req.grace = 24h;
   
     # set the backend server based on request (if multi-server stack)
-  <% if @node[:chef][:roles].include?('staging') %>
-    set req.backend = app_server_1;
-  <% elsif @node[:chef][:roles].include?('proxy') %>
-    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html)") {
+  <% if @node[:chef][:roles].include?('proxy') %>
+    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html|/uploads)") {
       set req.backend = static_server;
       return (lookup);
+    <% if @node[:varnish][:blog_proxy_host] %>
+    # logged in users must always pass
+    }else if( req.url ~ "^/blog/wp-(login|admin)" ){
+        set req.backend = blog_server;
+        return (pass);
+    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list)") {
+        set req.backend = blog_server;
+        
+        # Don't cache wordpress pages if logged in to wp
+        if (req.http.Cookie ~ "wordpress_logged_in_" || req.http.Cookie ~ "comment_author_") {
+            return (pass);
+        }
+    <% end %>
     } else {
       set req.backend = app_director;
     }
@@ -72,7 +99,7 @@ sub vcl_recv {
     if (req.url ~ "^/admin/") {
         return (pass);
     }
-
+    
     # Prevent duplication of caches
     set req.http.host = "www.<%= @node[:varnish][:proxy_host_name] %>";
     
@@ -86,8 +113,6 @@ sub vcl_fetch {
     # Actual browser/upstream cache is being set by the nginx proxy in front of varnish
     unset beresp.http.Cache-Control;
     
-    # The following two sections give 'not accessible' errors...commenting out for now...
-    
     # serve slightly stale content while a fresh version is fetched
     # better user experience and no thread pile up on the app servers
     set beresp.grace = 24h;
@@ -100,6 +125,13 @@ sub vcl_fetch {
     else {
         esi;
     }
+    
+    <% if @node[:varnish][:blog_proxy_host] %>
+    # WP doesn't set these so we're doing it here to make sure it stays in the cache
+    if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/wp-)") {
+      set beresp.ttl = 24h;
+    }
+    <% end %>
 }
 
 # vcl_hash creates the key for varnish under which the object is stored. It is

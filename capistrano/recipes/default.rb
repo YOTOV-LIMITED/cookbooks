@@ -20,7 +20,7 @@
 gem_package "capistrano"
 
 cap_setup do
-  path      "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}"
+  path      "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}"
   owner     "#{node[:capistrano][:deploy_user]}"
   group     "#{node[:capistrano][:deploy_user]}"
   appowner  "#{node[:capistrano][:deploy_user]}"

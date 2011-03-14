@@ -22,6 +22,11 @@ include_recipe 'nginx::vhost'
 
 package "nginx"
 
+service "nginx" do
+  supports :status => true, :restart => true, :reload => true
+  action [ :enable, :start ]
+end
+
 directory node[:nginx][:log_dir] do
   mode 0755
   owner node[:nginx][:user]
@@ -44,11 +49,12 @@ template "nginx.conf" do
   owner "root"
   group "root"
   mode 0644
+  notifies :restart, resources(:service => 'nginx')
 end
 
 # add location for varnish errors if it happens to go down
 # or can't reach the app servers
-if node[:chef][:roles].include?('proxy')
+if node[:chef][:roles].include?('proxy') && !node[:chef][:roles].include?('vagrant')
   directory "/var/www/apps/fr2/current/public/nginx" do
     action :create
     recursive true
@@ -73,9 +79,4 @@ if node[:chef][:roles].include?('proxy')
     cwd "/var/www/apps/fr2/current/public/nginx"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/logotype.png logotype.png"
   end
-end
-
-service "nginx" do
-  supports :status => true, :restart => true, :reload => true
-  action [ :enable, :start ]
 end

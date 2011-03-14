@@ -32,7 +32,7 @@ include_recipe "rails::logrotate"
   end
 end
 
-directory "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/current/public/articles" do
+directory "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/current/public/articles" do
   owner "#{node[:capistrano][:deploy_user]}"
   group "#{node[:capistrano][:deploy_user]}"
   mode 0755
@@ -41,7 +41,7 @@ directory "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/current/publi
 end
 
 if node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/database.yml" do
+  template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config/database.yml" do
     variables :environment   => node[:rails][:environment],
               :host          => node[:ubuntu][:database][:fqdn], 
               :port          => node[:mysql][:server_port],
@@ -52,7 +52,7 @@ if node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
   end
 end
 
-# template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config/sphinx.yml" do
+# template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config/sphinx.yml" do
 #   variables :server_address => node[:sphinx][:server_address],
 #             :server_port    => node[:sphinx][:server_port],
 #             :memory_limit   => node[:sphinx][:memory_limit],
@@ -61,23 +61,25 @@ end
 #   mode 0644
 # end
 
-execute "Get private config file amazon.yml" do
-  cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
-  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:amazon.yml amazon.yml"
-  user "#{node[:capistrano][:deploy_user]}"
-  group "#{node[:capistrano][:deploy_user]}"
-end
-execute "Get private config file api_keys.yml" do
-  cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
-  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:api_keys.yml api_keys.yml"
-  user "#{node[:capistrano][:deploy_user]}"
-  group "#{node[:capistrano][:deploy_user]}"
-end
-execute "Get private config file cloudkicker_config.rb" do
-  cwd "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/config"
-  command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:cloudkicker_config.rb cloudkicker_config.rb"
-  user "#{node[:capistrano][:deploy_user]}"
-  group "#{node[:capistrano][:deploy_user]}"
+unless node[:chef][:roles].include?('vagrant')
+  execute "Get private config file amazon.yml" do
+    cwd "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:amazon.yml amazon.yml"
+    user "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+  end
+  execute "Get private config file api_keys.yml" do
+    cwd "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:api_keys.yml api_keys.yml"
+    user "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+  end
+  execute "Get private config file cloudkicker_config.rb" do
+    cwd "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:cloudkicker_config.rb cloudkicker_config.rb"
+    user "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+  end
 end
 
 gem_package "bundler" do
@@ -89,20 +91,22 @@ link "/usr/bin/bundle" do
 end
 
 execute "bundle install" do
-  command "bundle install --deployment --gemfile #{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/Gemfile --without development test"
+  command "bundle install --deployment --gemfile #{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/Gemfile --without development test"
   user "#{node[:capistrano][:deploy_user]}"
   group "#{node[:capistrano][:deploy_user]}"
   action :nothing
 end
- 
-%w(Gemfile Gemfile.lock).each do |f|
-  template "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/#{f}" do
-    source "#{f}"
-    notifies :run, resources(:execute => "bundle install")
-  end
+
+unless node[:chef][:roles].include?('vagrant')
+  %w(Gemfile Gemfile.lock).each do |f|
+    template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
+      source "#{f}"
+      notifies :run, resources(:execute => "bundle install")
+    end
   
-  file "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared/tmp/#{f}" do
-    owner "#{node[:capistrano][:deploy_user]}"
-    group "#{node[:capistrano][:deploy_user]}"
+    file "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
+      owner "#{node[:capistrano][:deploy_user]}"
+      group "#{node[:capistrano][:deploy_user]}"
+    end
   end
 end

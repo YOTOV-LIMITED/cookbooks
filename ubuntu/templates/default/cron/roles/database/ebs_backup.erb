@@ -8,3 +8,8 @@
 # Delete the last 5 old snapshots. (keeps 10)
 # This relies on .awssecret being present in /mnt and symlinked to /root/.awssecret (it should contain "aws_accesskey \n aws_secretkey")
 0 10 	* * *   root    /usr/local/sbin/aws dsnap | grep <%=@ebs_volume_id%> | sort -r -k 5  | sed 1,10d | awk '{print "Deleting snapshot: " $2 " Dated: " $8}; system("/usr/local/sbin/aws delsnap " $2)'  >> <%=@log%>  2>&1
+
+# Backup our more volatile tables more often
+23 * 	* * *   root   ruby /opt/backups/scripts/email_feature_backup.rb
+27 * 	* * *   root   ruby /opt/backups/scripts/wordpress_backup.rb
+

@@ -40,10 +40,10 @@ if node[:ec2]
     notifies :run, resources(:execute => "apt-get update"), :immediately
     source "apt/alestic-ppa.list.erb"
   end
-  execute "add apt signature keys for alestic ppa" do
-    command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
-    user 'root'
-  end
+  # execute "add apt signature keys for alestic ppa" do
+  #   command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
+  #   user 'root'
+  # end
   
   # xfs file system tools (for EBS volumes)
   package 'xfsprogs' do
@@ -65,7 +65,8 @@ end
 #
 ####################################
 
-package 'vim'
+# vim
+package "vim"
 
 # varnish
 package "libpcre3-dev" do
@@ -115,7 +116,7 @@ end
 
 group "mysql" do
   gid 1100
-  not_if "cat /etc/group | grep deploy"
+  not_if "cat /etc/group | grep mysql"
 end
 
 group "deploy" do
@@ -241,6 +242,14 @@ if node[:ec2]
     end
   end
   
+  directory "/opt/backups/scripts" do
+    owner 'root'
+    group 'root'
+    mode 0744
+    recursive true
+    action :create
+    not_if do File.directory?("/opt/backups/scripts") end
+  end 
 
   if node[:rails][:environment] == 'production'
     if node[:chef][:roles].include?('database')
@@ -253,6 +262,20 @@ if node[:ec2]
                   :log             => node[:ubuntu][:backup_log_dir]
         source "cron/roles/database/ebs_backup.erb"
         mode 0644
+      end
+      
+      template "/opt/backups/scripts/email_feature_backup.rb" do
+        variables :mysql_user      => 'root', 
+                  :mysql_passwd    => node[:mysql][:server_root_password]
+        source "cron/roles/database/email_feature_backup.erb"
+        mode 0744
+      end
+      
+      template "/opt/backups/scripts/wordpress_backup.rb" do
+        variables :mysql_user      => node[:wordpress][:database_user], 
+                  :mysql_passwd    => node[:wordpress][:database_password]
+        source "cron/roles/database/wordpress_backup.erb"
+        mode 0744
       end
     elsif node[:chef][:roles].include?('worker')
       template "/etc/cron.d/ebs_backup" do
@@ -293,8 +316,8 @@ end
 
 if node[:chef][:roles].include?('worker') || node[:chef][:roles].include?('staging')
   template "/etc/cron.d/fr2_data" do
-    variables :apache_web_dir => node[:apache][:web_dir], 
-              :app_name       => node[:apache][:name], 
+    variables :apache_web_dir => node[:app][:web_dir], 
+              :app_name       => node[:app][:name], 
               :rails_env      => node[:rails][:environment],
               :run_user       => node[:capistrano][:deploy_user]
     source "cron/fr2_data.erb"
@@ -399,5 +422,40 @@ if node[:chef][:roles].include?('blog')
               :database_user  => node[:wordpress][:database_user],
               :password       => node[:wordpress][:database_password],
               :wordpress_keys => node[:wordpress][:keys]
+  end
+  
+  template "#{node[:app][:blog_root]}/config/wp-options.local.yml" do
+    source "wp-options.local.yml.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables :app_url => "http://www.#{node[:app][:url]}/blog/",
+              :varnish_server => "proxy.fr2.ec2.internal",
+              :varnish_port => node[:varnish][:admin_listen_port]
+  end
+  
+  if node[:chef][:roles].include?('worker') && node[:chef][:roles].include?('blog')
+    directory "#{node[:apache][:docroot]}/blog/wp-content/uploads" do
+      owner 'www-data'
+      group 'www-data'
+      mode 0755
+      recursive true
+      action :create
+    end
+    
+    link "#{node[:app][:app_root]}/current/public/uploads" do
+      to "#{node[:apache][:docroot]}/blog/wp-content/uploads"
+      group 'www-data'
+    end
+  end
+  
+end
+
+if node[:chef][:roles].include?('proxy') && !node[:chef][:roles].include?('vagrant')
+  template "#{node[:app][:app_root]}/current/public/robots.txt" do
+    source "robots.ssl.txt.erb"
+    owner "deploy"
+    group "deploy"
+    mode 0744
   end
 end

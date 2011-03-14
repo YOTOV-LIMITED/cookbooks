@@ -67,6 +67,14 @@ http {
     location /admin {
       rewrite  ^/(admin($|/.*))  https://<%= @node[:nginx][:host_name] %>/$1  permanent;
     }
+    
+    location /blog/wp-admin {
+      rewrite ^/(blog\/wp-admin($|/.*)) https://<%= @node[:nginx][:host_name] %>/$1  permanent;
+    }
+    
+    location /blog/wp-login {
+      rewrite ^/(blog\/wp-login($|/.*)) https://<%= @node[:nginx][:host_name] %>/$1  permanent;
+    }
     <% end %>
     
     location /nginx {
@@ -88,7 +96,7 @@ http {
        proxy_intercept_errors on;
     }
     
-    location ~* ^(/images|/javascripts|/stylesheets) {
+    location ~* ^(/images|/javascripts|/stylesheets|/uploads) {
        expires 1y;
        
        proxy_pass             http://varnish;
@@ -102,6 +110,10 @@ http {
        proxy_intercept_errors on;
     }
     <% end %>
+    
+    location /OFRUpload {
+      rewrite ^/(OFRUpload($|/.*)) http://www.ofr.gov/$1  permanent;
+    }
     
     location / {
       <% if @node[:nginx][:varnish_proxy] %>
@@ -169,6 +181,10 @@ http {
       location = /404_static.html {  
           root  <%= @node[:nginx][:doc_root] %>;  
       }
+      error_page 403  /403_static.html;  
+      location = /403_static.html {  
+          root  <%= @node[:nginx][:doc_root] %>;  
+      }
     <% end %>
   }
   
@@ -185,14 +201,18 @@ http {
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
     # redirect www
-    if ($host ~* www\.(.*)) {
-      set $host_without_www $1;
-      rewrite ^(.*)$ https://$host_without_www$1 permanent; # $1 contains '/foo', not 'www.mydomain.com/foo'
-    }
+    # if ($host ~* www\.(.*)) {
+    #   set $host_without_www $1;
+    #   rewrite ^(.*)$ https://$host_without_www$1 permanent; # $1 contains '/foo', not 'www.mydomain.com/foo'
+    # }
     
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-error.log;
     
+    location /robots.txt {
+      root  <%= @node[:nginx][:doc_root] %>;
+    }
+
     location / {
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
@@ -202,6 +222,7 @@ http {
       proxy_set_header       X-Client-Verify SUCCESS;
       proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+      proxy_set_header       X-Forwarded-Proto 'https';
     }
   }
   <% end %>
