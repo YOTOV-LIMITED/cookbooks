@@ -13,6 +13,14 @@
     <%- end -%>
     Order allow,deny
     Allow from all
+    
+    <%- if @node[:chef][:roles].include?('blog') -%>
+    ErrorDocument 403 /blog/errors/403.html
+    ErrorDocument 404 /blog/errors/404.html
+    ErrorDocument 500 /blog/errors/500.html
+    ErrorDocument 502 /blog/errors/502_503.html
+    ErrorDocument 503 /blog/errors/502_503.html
+    <%- end -%>
   </Directory>
   
   <Directory />
@@ -55,7 +63,7 @@
   RewriteRule ^.*$ /system/maintenance.html [L]
   
   <% if @node[:chef][:roles].include?('blog') %>
-  # wordpress blog
+  # wordpress blog  
   #RewriteRule ^blog\/search(.*) /index.php [P]
 
   #RewriteRule ^index\.php$ - [L]
