@@ -379,7 +379,10 @@ template "/etc/hosts" do
             :database_alias      => node[:ubuntu][:database][:alias],
             :sphinx_ip           => node[:ubuntu][:sphinx][:ip],
             :sphinx_fqdn         => node[:ubuntu][:sphinx][:fqdn],
-            :sphinx_alias        => node[:ubuntu][:sphinx][:alias]
+            :sphinx_alias        => node[:ubuntu][:sphinx][:alias],
+            :mail_ip             => node[:ubuntu][:mail][:ip],
+            :mail_fqdn           => node[:ubuntu][:mail][:fqdn],
+            :mail_alias          => node[:ubuntu][:mail][:alias]
   source "etc_hosts.erb"
   mode 0644
 end

@@ -12,7 +12,10 @@ default[:ubuntu][:database][:fqdn]       = 'database.fr2.ec2.internal'
 default[:ubuntu][:database][:alias]      = 'database'
 default[:ubuntu][:sphinx][:ip]           = "127.0.0.1"
 default[:ubuntu][:sphinx][:fqdn]         = 'sphinx.fr2.ec2.internal'
-default[:ubuntu][:sphinx][:alias]        = 'sphinx' 
+default[:ubuntu][:sphinx][:alias]        = 'sphinx'
+default[:ubuntu][:mail][:ip]             = "127.0.0.1"
+default[:ubuntu][:mail][:fqdn]           = 'mail.fr2.ec2.internal'
+default[:ubuntu][:mail][:alias]          = 'mail' 
 
 default[:ubuntu][:backup_log_dir] = "/mnt/backup.log"
 
