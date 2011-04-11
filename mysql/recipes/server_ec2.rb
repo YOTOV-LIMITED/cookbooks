@@ -88,21 +88,30 @@ if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles
 
   # we're using ebs backed images which have a small volume - so we mount this to the
   # non-persistent /mnt volume for added space.
-  # mysql uses /tmp for temporary tables.
-  directory "/mnt/tmp" do
+  # we're setting mysql to /tmp/mysql for temporary tables.
+  directory "/mnt/tmp/mysql" do
     owner "root"
     group "root"
     mode 0777
     action :create
+    recursive true
   end
   
-  mount "/tmp" do
-    device "/mnt/tmp"
+  directory "/tmp/mysql" do
+    owner "root"
+    group "root"
+    mode 0777
+    action :create
+    recursive true
+  end
+  
+  mount "/tmp/mysql" do
+    device "/mnt/tmp/mysql"
     fstype "none"
     options "bind"
     action [:enable, :mount]
     # Do not execute if its already mounted (ubunutu/linux only)
-    not_if "cat /proc/mounts | grep /tmp"
+    not_if "cat /proc/mounts | grep /tmp/mysql"
   end
   
 

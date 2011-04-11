@@ -25,6 +25,7 @@ default[:mysql][:server_repl_password]   = secure_password
 default[:mysql][:bind_address]           = '127.0.0.1'
 default[:mysql][:server_port]            = 3306
 default[:mysql][:datadir]                = "/var/lib/mysql"
+default[:mysql][:tmpdir]                 = '/tmp'
 
 if attribute?(:ec2)
   default[:mysql][:ec2_path]    = "/mnt/mysql"

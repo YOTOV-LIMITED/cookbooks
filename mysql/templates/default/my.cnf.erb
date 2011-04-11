@@ -49,7 +49,7 @@ socket          = /var/run/mysqld/mysqld.sock
 port            = <%= @node[:mysql][:server_port] %>
 basedir         = /usr
 datadir         = <%= @node[:mysql][:datadir] %>
-tmpdir          = /tmp
+tmpdir          = <%= @node[:mysql][:tmpdir] %>
 skip-external-locking
 #
 
