@@ -2,6 +2,7 @@
 backend app_server_<%= i+1 %> {
   .host = "<%= host %>";
   .port = "<%= @node[:varnish][:app_proxy_port] %>";
+  <% unless @node[:chef][:roles].include?('vagrant') %>
   .probe = {
              .url = "<%= @node[:varnish][:app_proxy_host_probe_url] %>";
              .interval = 5s;
@@ -9,6 +10,7 @@ backend app_server_<%= i+1 %> {
              .window = 5;
              .threshold = 3;
   }
+  <% end %>
 }
 <% end %>
 
