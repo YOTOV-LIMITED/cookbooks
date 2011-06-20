@@ -22,15 +22,24 @@ include_recipe 'nginx::vhost'
 
 package "nginx"
 
-service "nginx" do
-  supports :status => true, :restart => true, :reload => true
-  action [ :enable, :start ]
-end
-
 directory node[:nginx][:log_dir] do
   mode 0755
   owner node[:nginx][:user]
   action :create
+end
+
+if node[:chef][:roles].include?('splunk_proxy')
+  directory "#{node[:nginx][:log_dir]}/splunk.#{node[:nginx][:host_name]}" do
+    mode 0755
+    owner node[:nginx][:user]
+    action :create
+    recursive true
+  end
+end
+
+service "nginx" do
+  supports :status => true, :restart => true, :reload => true
+  action [ :enable, :start ]
 end
 
 %w{nxensite nxdissite}.each do |nxscript|

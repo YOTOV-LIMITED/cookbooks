@@ -382,7 +382,10 @@ template "/etc/hosts" do
             :sphinx_alias        => node[:ubuntu][:sphinx][:alias],
             :mail_ip             => node[:ubuntu][:mail][:ip],
             :mail_fqdn           => node[:ubuntu][:mail][:fqdn],
-            :mail_alias          => node[:ubuntu][:mail][:alias]
+            :mail_alias          => node[:ubuntu][:mail][:alias],
+            :splunk_ip           => node[:ubuntu][:splunk][:ip],
+            :splunk_fqdn         => node[:ubuntu][:splunk][:fqdn],
+            :splunk_alias        => node[:ubuntu][:splunk][:alias]
   source "etc_hosts.erb"
   mode 0644
 end

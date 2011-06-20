@@ -15,9 +15,12 @@ default[:ubuntu][:sphinx][:fqdn]         = 'sphinx.fr2.ec2.internal'
 default[:ubuntu][:sphinx][:alias]        = 'sphinx'
 default[:ubuntu][:mail][:ip]             = "127.0.0.1"
 default[:ubuntu][:mail][:fqdn]           = 'mail.fr2.ec2.internal'
-default[:ubuntu][:mail][:alias]          = 'mail' 
+default[:ubuntu][:mail][:alias]          = 'mail',
+default[:ubuntu][:splunk][:ip]           = "127.0.0.1"
+default[:ubuntu][:splunk][:fqdn]         = 'splunk.fr2.ec2.internal'
+default[:ubuntu][:splunk][:alias]        = 'splunk' 
 
-default[:ubuntu][:backup_log_dir] = "/mnt/backup.log"
+default[:ubuntu][:backup_log_dir] = "/var/log/backup.log"
 
 default[:ubuntu][:logrotate][:syslog][:interval] = 'daily'
 default[:ubuntu][:logrotate][:syslog][:keep_for] = 7

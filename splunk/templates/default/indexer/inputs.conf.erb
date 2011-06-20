@@ -1,0 +1,10 @@
+<%# expects [ {:path => '/var/log/apache2', :ignore_older_than => '7d'} ] %>
+<% @files_to_monitor.each do |file_hash| %>
+
+[monitor://<%= file_hash['path'] %>]
+ignoreOlderThan = <%= file_hash['ignore_older_than'] %>
+<%- if file_hash['source_type'] -%>
+sourcetype = <%= file_hash['source_type'] %>
+<%- end -%>
+
+<% end %>

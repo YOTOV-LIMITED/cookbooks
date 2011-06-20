@@ -55,6 +55,12 @@ http {
       # rewrite ^(.*)$ http://www.ofr.gov$1; #someone fat fingered the dns...
       rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1; # $1 contains '/foo', not 'mydomain.com/foo'
     }
+
+    <% if @node[:chef][:roles].include?('splunk_proxy') %>
+    if ( $host = 'splunk.<%= @node[:nginx][:host_name] %>' ) {
+      rewrite ^(.*)$ https://splunk.<%= @node[:nginx][:host_name] %>$1;
+    }
+    <% end %>
     
     # if ( $host = 'www.federalregister.gov' ) {
     #   rewrite ^(.*)$ http://www.ofr.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
@@ -226,7 +232,35 @@ http {
     }
   }
   <% end %>
-  
+
+  <% if @node[:chef][:roles].include?('splunk_proxy') %>
+  server {
+    listen   443;
+    ssl on;
+    ssl_certificate /etc/ssl/certs/<%= @node[:nginx][:ssl_cert_name] %>;
+    ssl_certificate_key /etc/ssl/private/<%= @node[:nginx][:ssl_cert_key_name] %>;
+    
+    ssl_protocols SSLv3 TLSv1;
+    ssl_ciphers HIGH:MEDIUM:+TLSv1:!SSLv2:+SSLv3:!ADH:!aNULL:!eNULL:!NULL:!LOW:!EXP:RC4+RSA;
+    
+    server_name splunk.<%= @node[:nginx][:host_name] %>;
+
+    access_log /var/log/nginx/splunk.<%= @node[:nginx][:host_name] %>/ssl-access.log;
+    error_log /var/log/nginx/splunk.<%= @node[:nginx][:host_name] %>/ssl-error.log;
+
+    location / {
+      proxy_pass             http://splunk.fr2.ec2.internal:8000;
+      proxy_set_header       Host $host;
+      proxy_set_header       X-Real-IP $remote_addr;
+      proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header       X-Client-Verify SUCCESS;
+      proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+      proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+    }
+  }
+  <% end %>
+
+
   <% if @node[:nginx][:varnish_proxy] %>
   server {
     listen 4950;
