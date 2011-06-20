@@ -1,3 +1,8 @@
+C{
+  #include <stdlib.h>
+  #include <stdio.h>
+}C
+
 <% @node[:varnish][:app_proxy_host].each_with_index do |host, i| %>
 backend app_server_<%= i+1 %> {
   .host = "<%= host %>";
@@ -53,7 +58,31 @@ sub vcl_recv {
       req.request != "DELETE") {
         return (pipe);
     }
-    
+
+    # ab testing - check cookie to see if group has been assigned
+    # either use it or drop down to C to get a random group
+    # ensure group is passed along to app servers as a header
+    if (req.http.Cookie ~ "(^|;) ?ab_group=\d+(;|$)") {
+      if( req.http.Cookie ~ "ab_group=[0-9]+" ) {
+        set req.http.X-AB-Group = regsub( req.http.Cookie,    ".*ab_group=", "");
+        set req.http.X-AB-Group = regsub( req.http.X-AB-Group, ";.*", "");
+      }
+    } else {
+      C{
+        char buff[5];
+        sprintf(buff,"%d",rand()%2 + 1);
+        VRT_SetHdr(sp, HDR_REQ, "\013X-AB-Group:", buff, vrt_magic_string_end);
+      }C
+      # 
+      if (req.http.Cookie) {
+        set req.http.Cookie = req.http.Cookie ";";
+      } else {
+        set req.http.Cookie = "";
+      }
+      set req.http.Cookie = req.http.Cookie "ab_group=" req.http.X-AB-Group;
+    }
+
+
     # Compression handled upstream; only want one in the cache
     if (req.http.Accept-Encoding) {
         remove req.http.Accept-Encoding;
@@ -144,6 +173,13 @@ sub vcl_hash {
     # these 2 entries are the default ones used for vcl. Below we add our own.
     set req.hash += req.url;
     set req.hash += req.http.host;
+
+    # doing ab testing on specific paths
+    if (req.url ~ "^/layout/header" ) {
+      set req.hash += "ab_group";
+      set req.hash += req.http.X-AB-Group;
+    }
+
     
     # Hash differently based on presence of javascript_enabled cookie.
     if( req.url ~ "^/articles/search/header" && req.http.Cookie ~ "javascript_enabled=1" ) {
@@ -152,4 +188,9 @@ sub vcl_hash {
     }
     
     return(hash);
+}
+
+sub vcl_deliver {
+  # make sure ab testing is part of the cookie on the way back out
+  set resp.http.Set-Cookie = "ab_group=" req.http.X-AB-Group "; path=/";
 }
