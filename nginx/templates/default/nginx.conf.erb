@@ -206,12 +206,6 @@ http {
     
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
     
-    # redirect www
-    # if ($host ~* www\.(.*)) {
-    #   set $host_without_www $1;
-    #   rewrite ^(.*)$ https://$host_without_www$1 permanent; # $1 contains '/foo', not 'www.mydomain.com/foo'
-    # }
-    
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-error.log;
     
@@ -219,7 +213,7 @@ http {
       root  <%= @node[:nginx][:doc_root] %>;
     }
 
-    location / {
+    location ~* ^(/admin|/blog/wp-admin|/blog/wp-login) {
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;
@@ -230,6 +224,12 @@ http {
       proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
       proxy_set_header       X-Forwarded-Proto 'https';
     }
+
+    location / {
+      rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1  permanent;
+    }
+    
+
   }
   <% end %>
 
