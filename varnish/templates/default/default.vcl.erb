@@ -44,7 +44,7 @@ sub vcl_recv {
     # Rewrite top-level wordpress requests to /blog/
     set req.url = regsub(
         req.url,
-        "^/(learn|policy|layout/footer_page_list|layout/homepage_post_list)",
+        "^/(learn|policy|layout/footer_page_list|layout/homepage_post_list|/layout/navigation_page_list)",
         "/blog/\1"
     );
     <% end %>
@@ -102,7 +102,7 @@ sub vcl_recv {
     }else if( req.url ~ "^/blog/wp-(login|admin)" ){
         set req.backend = blog_server;
         return (pass);
-    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list)") {
+    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/layout/navigation_page_list)") {
         set req.backend = blog_server;
         
         # Don't cache wordpress pages if logged in to wp
@@ -159,7 +159,7 @@ sub vcl_fetch {
     
     <% if @node[:varnish][:blog_proxy_host] %>
     # WP doesn't set these so we're doing it here to make sure it stays in the cache
-    if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/wp-)") {
+    if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/wp-|/layout/navigation_page_list|/layout/homepage_post_list)") {
       set beresp.ttl = 24h;
     }
     <% end %>
