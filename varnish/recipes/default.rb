@@ -62,9 +62,29 @@ bash "Install Varnish" do
   not_if { ::File.directory?("/usr/local/varnish-#{node[:varnish][:version]}") }
 end
 
+template "/etc/init.d/varnish" do
+  source "varnish.init.d.erb"
+  owner "varnish"
+  group "varnish"
+  mode 0755
+end
+
+template "#{node[:varnish][:default]}" do
+  source "varnish.sysconfig.erb"
+  owner "varnish"
+  group "varnish"
+  mode 0644
+end
+
+directory "/var/lib/varnish/" do
+  owner "varnish"
+  group "varnish"
+  mode "0755"
+end
+
 service "varnish" do
   supports :restart => true, :reload => true
-  action [ :enable, :start ]
+  action [ :enable ]
 end
 
 template "#{node[:varnish][:dir]}/default.vcl" do
@@ -75,22 +95,3 @@ template "#{node[:varnish][:dir]}/default.vcl" do
   notifies :restart, resources(:service => "varnish")
 end
 
-template "#{node[:varnish][:default]}" do
-  source "varnish.sysconfig.erb"
-  owner "varnish"
-  group "varnish"
-  mode 0644
-end
-
-template "/etc/init.d/varnish" do
-  source "varnish.init.d.erb"
-  owner "varnish"
-  group "varnish"
-  mode 0755
-end
-
-directory "/var/lib/varnish/" do
-  owner "varnish"
-  group "varnish"
-  mode "0755"
-end
