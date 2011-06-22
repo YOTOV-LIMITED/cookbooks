@@ -213,7 +213,7 @@ http {
       root  <%= @node[:nginx][:doc_root] %>;
     }
 
-    location ~* ^(/admin|/blog/wp-admin|/blog/wp-login) {
+    location ~* ^(/admin|/blog/wp-) {
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;
