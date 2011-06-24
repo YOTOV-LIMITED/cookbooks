@@ -2,6 +2,7 @@ PassengerRoot <%= @node[:passenger_enterprise][:root_path] %>
 PassengerRuby <%= @node[:ruby_enterprise][:ruby_bin] %>
 
 RailsEnv <%= @node[:rails][:environment] %>
+RackEnv <%= @node[:rails][:environment] %>
 
 # Let's keep our processes spinning for a long time since the site is low traffic and we don't want slow requests
 PassengerPoolIdleTime <%= @node[:passenger_enterprise][:pool_idle_time] %>
