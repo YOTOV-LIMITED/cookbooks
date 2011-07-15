@@ -35,4 +35,8 @@
   /var/run/mysqld/mysqld.sock w,
   /var/www/apps/** r,
 
+  <% if @node[:mysql][:install_innodb_plugin] %>
+  /usr/lib/mysql/plugin/ r,
+  /usr/lib/mysql/plugin/* mr,  
+  <% end %>
 }

@@ -43,3 +43,7 @@ default[:mysql][:tunable][:back_log]            = "128"
 default[:mysql][:tunable][:table_cache]         = "128"
 default[:mysql][:tunable][:max_heap_table_size] = "32M"
 default[:mysql][:tunable][:query_cache_size]    = "16M"
+
+# MySQL 5.1 InnoDB Plugin
+# http://dev.mysql.com/doc/innodb-plugin/1.0/en/innodb-plugin-installation.html
+default[:mysql][:install_innodb_plugin] = false

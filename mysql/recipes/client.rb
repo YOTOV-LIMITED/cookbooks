@@ -18,9 +18,11 @@
 #
 
 p = package "mysql-devel" do
+  ubuntu_package = node[:platform_version].to_f >= 9.10 ? 'libmysqlclient16-dev' : 'libmysqlclient15-dev'
+
   package_name value_for_platform(
     [ "centos", "redhat", "suse" ] => { "default" => "mysql-devel" },
-    "default" => 'libmysqlclient15-dev'
+    "default" => ubuntu_package
   )
   action :nothing
 end

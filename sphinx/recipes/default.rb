@@ -17,7 +17,12 @@
 # limitations under the License.
 #
 
-package "libmysqlclient15-dev"
+package node[:platform_version].to_f >= 9.10 ? 'libmysqlclient16-dev' : 'libmysqlclient15-dev'
+
+if node[:platform_version].to_f >= 11.04
+  # g++ doesn't seem to be installed?
+  package 'g++'
+end
 
 directory node[:sphinx][:src_path] do
   owner "root"
