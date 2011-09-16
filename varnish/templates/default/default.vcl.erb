@@ -41,6 +41,13 @@ director app_director round-robin {
 <% end %>
 
 sub vcl_recv {
+    <% if @node[:varnish][:audit_proxy_host_name] %>
+    if (req.http.host == "<%= @node[:varnish][:audit_proxy_host_name] %>") {
+      set req.backend = app_director;
+      return (pass);
+    }
+    <% end %>
+    
     <% if @node[:varnish][:blog_proxy_host] %>
     # Rewrite top-level wordpress requests to /blog/
     set req.url = regsub(

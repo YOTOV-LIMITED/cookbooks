@@ -46,7 +46,7 @@ http {
     server <%= @node[:nginx][:varnish_proxy_host] %>:<%= @node[:varnish][:listen_port] %> weight=<%= @node[:nginx][:varnish_weight] %> max_fails=<%= @node[:nginx][:varnish_max_fails] %> fail_timeout=<%= @node[:nginx][:varnish_fail_timeout] %>;
   }
   <% end %>
-  
+
   <% if @node[:chef][:roles].include?('proxy') %>
   server {
     listen <%= @node[:nginx][:listen_port] %>;
@@ -81,6 +81,29 @@ http {
     # doc root
     root <%= @node[:nginx][:doc_root] %>;
   }
+
+  server {
+    listen <%= @node[:nginx][:listen_port] %>;
+    server_name audit.<%= @node[:nginx][:host_name] %>;
+
+    location / {
+      # set cache control
+      expires 5m;
+
+      proxy_pass             http://varnish;
+      proxy_redirect         http://varnish/ http://$host:$server_port/;
+      proxy_set_header       Host $host;
+      proxy_set_header       X-Real-IP $remote_addr;
+      proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header       X-Client-Verify SUCCESS;
+      proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
+      proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
+      proxy_intercept_errors on;
+    }
+  }
+
+  <% end %>
+
   server {
     listen <%= @node[:nginx][:listen_port] %>;
     server_name www.<%= @node[:nginx][:host_name] %> <%= @node[:nginx][:host_name] %>;
@@ -293,7 +316,6 @@ http {
     }
   }
   <% end %>
-
 
   <% if @node[:nginx][:varnish_proxy] %>
   server {
