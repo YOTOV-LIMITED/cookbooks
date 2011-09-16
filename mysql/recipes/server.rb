@@ -65,13 +65,13 @@ service "mysql" do
   action :nothing
 end
 
-if node[:mysql][:install_innodb_plugin]
-  execute "perform mysql slow shutdown" do
-    command "echo 'stopping mysql'" #"SET GLOBAL innodb_fast_shutdown=0;"
-    notifies :stop, resources(:service => "mysql"), :immediately
-    ignore_failure true # 1-failure here is the server already shutdown...
-  end
-end
+# if node[:mysql][:install_innodb_plugin]
+#   execute "perform mysql slow shutdown" do
+#     command "echo 'stopping mysql'" #"SET GLOBAL innodb_fast_shutdown=0;"
+#     notifies :stop, resources(:service => "mysql"), :immediately
+#     ignore_failure true # 1-failure here is the server already shutdown...
+#   end
+# end
 
 template value_for_platform([ "centos", "redhat", "suse" ] => {"default" => "/etc/my.cnf"}, "default" => "/etc/mysql/my.cnf") do
   source "my.cnf.erb"

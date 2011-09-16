@@ -19,8 +19,12 @@
 
 
 if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('database') )
+  
   service "mysql" do
     action :stop
+    not_if do
+      system("status mysql | grep -q 'mysql stop/waiting'")
+    end
   end
   
   unless FileTest.directory?(node[:mysql][:ec2_path])
