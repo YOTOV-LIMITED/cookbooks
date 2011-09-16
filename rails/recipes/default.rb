@@ -43,7 +43,7 @@ end
 if node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
   template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config/database.yml" do
     variables :environment   => node[:rails][:environment],
-              :host          => node[:ubuntu][:database][:fqdn], 
+              :host          => node[:mysql][:database_server_fqdn], 
               :port          => node[:mysql][:server_port],
               :database_name => node[:mysql][:database_name],
               :password      => node[:mysql][:server_root_password]
