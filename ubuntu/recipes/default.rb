@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-#include_recipe "apt"
+include_recipe "apt"
 
 ####################################
 #
@@ -40,6 +40,7 @@ if node[:ec2]
     notifies :run, resources(:execute => "apt-get update"), :immediately
     source "apt/alestic-ppa.list.erb"
   end
+
   # execute "add apt signature keys for alestic ppa" do
   #   command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
   #   user 'root'
@@ -48,7 +49,7 @@ if node[:ec2]
   # xfs file system tools (for EBS volumes)
   package 'xfsprogs' do
     action :install
-  end
+  end  
 end
 
 # 10-gen source for MongoDB
@@ -407,7 +408,7 @@ if node[:chef][:roles].include?('blog')
     owner "root"
     group "root"
     mode 0644
-    variables :host           => node[:ubuntu][:database][:fqdn], 
+    variables :host           => node[:mysql][:database_server_fqdn], 
               :port           => node[:mysql][:server_port],
               :database_name  => node[:wordpress][:database_name],
               :database_user  => node[:wordpress][:database_user],
