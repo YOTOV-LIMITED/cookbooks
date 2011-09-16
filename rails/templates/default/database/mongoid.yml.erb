@@ -1,0 +1,33 @@
+# defaults: &defaults
+  # host: localhost
+  # slaves:
+  #   - host: slave1.local
+  #     port: 27018
+  #   - host: slave2.local
+  #     port: 27019
+  
+<% if @environment == 'development' %>
+test:
+  host: <%= @host %>
+  port: <%= @port %>
+  username: <%= @username %>
+  password: <%= @password %>
+  database: <%= @node[:app][:app_name] %>_test
+<% end %>
+
+<% if @node[:rails][:cucumber] %>
+cucumber:
+  host: <%= @host %>
+  port: <%= @port %>
+  username: <%= @username %>
+  password: <%= @password %>
+  database: <%= @node[:app][:app_name] %>_test
+<% end %>
+
+<%= @environment %>:
+  host: <%= @host %>
+  port: <%= @port %>
+  username: <%= @username %>
+  password: <%= @password %>
+  database: <%= @database_name %>
+  

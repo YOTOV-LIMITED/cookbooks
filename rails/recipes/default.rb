@@ -52,6 +52,20 @@ if node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
   end
 end
 
+if node[:rails][:using_mongoid] == 'true' && ( node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker') )
+  template "#{node[:app][:app_root]}/#{node[:rails][:using_shared] == 'true' ? 'current/' : ''}config/mongoid.yml" do
+    variables :environment   => node[:rails][:environment],
+              :host          => node[:mongodb][:bind_address], 
+              :port          => node[:mongodb][:port],
+              :database_name => node[:mongodb][:database],
+              :password      => node[:mongodb][:password],
+              :username      => node[:mongodb][:username]
+    source "database/mongoid.yml.erb"
+    mode 0644
+  end
+end
+
+
 # template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config/sphinx.yml" do
 #   variables :server_address => node[:sphinx][:server_address],
 #             :server_port    => node[:sphinx][:server_port],
