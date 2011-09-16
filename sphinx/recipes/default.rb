@@ -35,7 +35,10 @@ end
 remote_file node[:sphinx][:tar_file] do
   source node[:sphinx][:url]
   mode "0755"
-  checksum node[:sphinx][:tar_file_checksum]
+  #checksum node[:sphinx][:tar_file_checksum]
+  not_if do 
+    system("#{node[:sphinx][:bin_path]} --help | grep -q '#{node[:sphinx][:version]}'")
+  end
 end
 
 if node[:sphinx][:libstemmer]
@@ -49,7 +52,9 @@ if node[:sphinx][:libstemmer]
     interpreter "bash"
     user "root"
     cwd node[:sphinx][:src_path]
-    not_if "test -f /usr/local/bin/searchd"
+    not_if do
+      system("#{node[:sphinx][:bin_path]} --help | grep -q '#{node[:sphinx][:version]}'")
+    end
     code <<-EOH
       tar -xvf #{node[:sphinx][:tar_file]}
       cd  sphinx-#{node[:sphinx][:version]}
@@ -64,7 +69,9 @@ else
     interpreter "bash"
     user "root"
     cwd node[:sphinx][:src_path]
-    not_if "test -f /usr/local/bin/searchd"
+    not_if do
+      system("#{node[:sphinx][:bin_path]} --help | grep -q '#{node[:sphinx][:version]}'")
+    end
     code <<-EOH
       tar -xvf #{node[:sphinx][:tar_file]}
       cd  sphinx-#{node[:sphinx][:version]}
@@ -74,3 +81,22 @@ else
       EOH
   end
 end
+
+if node.attribute?("sphinx") && node.attribute?("rails") && node[:rails][:using_thinking_sphinx] == 'true'
+  
+  template_path = (8.04..9.04).include?(node.platform_version.to_f) ? "/etc/event.d/searchd" : "/etc/init/searchd.conf"
+
+  template template_path do
+    source "searchd.upstart.erb"
+    variables :searchd_path => node[:sphinx][:bin_path],
+              :config       => "#{node[:app][:app_root]}/#{node[:rails][:using_shared] == 'true' ? 'shared/' : 'current/'}config/#{node[:rails][:environment]}.sphinx.conf",
+              :user         => node[:capistrano][:deploy_user]
+    mode "0644"
+  end
+  
+  service "searchd" do
+    provider Chef::Provider::Service::Upstart
+    action [ :enable, :start ]
+  end
+end
+

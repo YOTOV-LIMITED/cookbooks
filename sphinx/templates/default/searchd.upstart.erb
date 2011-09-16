@@ -1,0 +1,22 @@
+description "Starts and stops sphinx (searchd) process"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+<%- if @node.platform_version.to_f > 8.04 -%>
+expect daemon
+<%- else -%>
+daemon
+<%- end -%>
+respawn
+
+env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/ruby/bin/
+
+script
+  su -c '<%= @searchd_path %> --config <%= @config %>' <%= @user %>
+end script
+
+post-stop script
+  pkill -u <%= @user %> -f '<%= @searchd_path %> --config <%= @config %>'
+end script
+
