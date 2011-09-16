@@ -1,0 +1,22 @@
+description "Starts and stops mongodb (mongod) process"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+<%- if @node.platform_version.to_f > 8.04 -%>
+expect daemon
+<%- else -%>
+daemon
+<%- end -%>
+respawn
+
+env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/ruby/bin/
+
+script
+  su -c '<%= @mongodb_path %> --config=<%= @config %> --fork' <%= @user %>
+end script
+
+post-stop script
+  pkill -s 2 -u <%= @user %> -F <%= @mongodb_pid_path %>
+end script
+
