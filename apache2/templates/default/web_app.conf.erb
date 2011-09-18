@@ -1,10 +1,10 @@
-<VirtualHost *:<%=@node[:apache][:vhost_port]%>>
-  ServerName <%= @node[:apache][:server_name] %>
-  ServerAlias <% @node[:apache][:server_aliases].each do |a| %><%= "#{a}" %> <% end %>
-  DocumentRoot <%= @node[:apache][:docroot] %>
+<VirtualHost *:<%= @vhost_port %>>
+  ServerName <%= @server_name%>
+  ServerAlias <% @server_aliases.each do |a| %><%= "#{a}" %> <% end %>
+  DocumentRoot <%= @docroot %>
   RewriteEngine On
   
-  <Directory <%= @node[:apache][:docroot] %>>
+  <Directory <%= @docroot %>>
     Options FollowSymLinks
     <%- if @node[:chef][:roles].include?('blog') -%>
     AllowOverride all
@@ -46,17 +46,17 @@
   </Location>
 
   LogLevel info
-  ErrorLog <%= @node[:apache][:log_dir] %>/<%= @node[:apache][:name] %>-error.log
-  CustomLog <%= @node[:apache][:log_dir] %>/<%= @node[:apache][:name] %>-access.log custom
+  ErrorLog <%= @apache_log_dir %>/<%= @name %>-error.log
+  CustomLog <%= @apache_log_dir %>/<%= @name %>-access.log custom
 
   RewriteEngine On
-  RewriteLog <%= @node[:apache][:log_dir] %>/<%= @node[:apache][:name] %>-rewrite.log
+  RewriteLog <%= @apache_log_dir %>/<%= @name %>-rewrite.log
   RewriteLogLevel 0
   
-  # Canonical host, <%= @node[:apache][:server_name] %>
-  # RewriteCond %{HTTP_HOST}   !^<%= @node[:apache][:server_name] %> [NC]
+  # Canonical host, <%= @server_name %>
+  # RewriteCond %{HTTP_HOST}   !^<%= @server_name %> [NC]
   # RewriteCond %{HTTP_HOST}   !^$
-  # RewriteRule ^/(.*)$        http://<%= @node[:apache][:server_name] %>/$1 [L,R=301]
+  # RewriteRule ^/(.*)$        http://<%= @server_name %>/$1 [L,R=301]
 
   RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
   RewriteCond %{SCRIPT_FILENAME} !maintenance.html
