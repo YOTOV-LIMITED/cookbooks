@@ -33,6 +33,13 @@ if node[:ec2]
     source "apt/sources.list.erb"
   end
 
+  if node.platform_version.to_f >= 11.04
+    execute "add apt signature keys for alestic ppa" do
+      command "add-apt-repository ppa:alestic"
+      user 'root'
+    end
+  end
+
   # ec2-consistent-snapshot lives here...
   template "/etc/apt/sources.list.d/alestic-ppa.list" do
     mode 0644
@@ -40,11 +47,6 @@ if node[:ec2]
     notifies :run, resources(:execute => "apt-get update"), :immediately
     source "apt/alestic-ppa.list.erb"
   end
-
-  # execute "add apt signature keys for alestic ppa" do
-  #   command "apt-key adv --keyserver keys.gnupg.net --recv-keys BE09C571"
-  #   user 'root'
-  # end
   
   # xfs file system tools (for EBS volumes)
   package 'xfsprogs' do

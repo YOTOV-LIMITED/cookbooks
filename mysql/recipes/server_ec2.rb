@@ -120,7 +120,7 @@ if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles
   
 
   service "mysql" do
-    action :start
+    #action :start
   end
 
 end
