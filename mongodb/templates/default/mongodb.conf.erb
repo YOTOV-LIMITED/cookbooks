@@ -7,5 +7,7 @@ bind_ip = <%= @node[:mongodb][:bind_address] %>
 port = <%= @node[:mongodb][:port] %>
 logpath = <%= @node[:mongodb][:log_dir] %>/mongodb.log
 logappend = true
-auth = <%= @node[:mongodb][:auth] == 'true' ? true : false %>
+<% if @node[:mongodb][:auth] == 'true' %>
+auth = true
+<% end %>
 pidfilepath = <%= @node[:mongodb][:pid_path] %>
