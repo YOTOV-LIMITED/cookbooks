@@ -9,7 +9,7 @@ default[:mongodb][:file_name] = "mongodb-linux-#{kernel[:machine] || 'i686'}-#{m
 default[:mongodb][:url]       = "http://fastdl.mongodb.org/linux/#{mongodb[:file_name]}.tgz"
 
 default[:mongodb][:root]       = "/usr/local/mongodb"
-default[:mongodb][:bin_path]   = "/usr/local/bin/mongodb"
+default[:mongodb][:bin_path]   = "/usr/local/bin/mongod"
 default[:mongodb][:data_dir]   = "/data/db"
 default[:mongodb][:log_dir]    = "/var/log/mongodb"
 default[:mongodb][:config_dir] = "/etc/mongodb"
