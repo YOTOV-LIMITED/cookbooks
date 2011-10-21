@@ -19,4 +19,4 @@
 
 # Import public inspection documents
 # runs every 15 minutes from 7AM EDT until 6PM M-F
-0,15,30,45 11-22 	* * 1-5	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:public_inspection:import 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/public_inspection_import.log
+0,15,30,45 11-22 	* * 1-5	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:public_inspection:import_and_deliver 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/public_inspection_import.log
