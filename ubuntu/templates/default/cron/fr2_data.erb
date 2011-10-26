@@ -18,5 +18,5 @@
 0 7 	* * 7	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH remote:sphinx:reindex 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/weekly_sphinx_reindex.log
 
 # Import public inspection documents
-# runs every 15 minutes from 7AM EDT until 6PM M-F
-0,15,30,45 11-22 	* * 1-5	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:public_inspection:import_and_deliver 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/public_inspection_import.log
+# runs every 5 minutes from 7AM EDT until 7PM Monday-Saturday
+0,5,10,15,20,25,30,35,40,45,50,55 11-23 	* * 1-6	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:public_inspection:import_and_deliver 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/public_inspection_import.log
