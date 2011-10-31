@@ -20,3 +20,8 @@
 # Import public inspection documents
 # runs every 5 minutes from 7AM EDT until 7PM Monday-Saturday
 2,7,12,17,22,27,32,37,42,47,52,57 11-23 	* * 1-6	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:public_inspection:import_and_deliver 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/public_inspection_import.log
+
+# Purge revoked PI documents at 5:15PM
+# # runs at 5:15PM EDT M-F
+15 22,23 	* * 1-5 <%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:public_inspection:purge_revoked_documents 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/public_inspection_import.log
+
