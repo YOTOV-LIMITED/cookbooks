@@ -47,6 +47,18 @@ http {
   }
   <% end %>
 
+  <% if @node[:chef][:roles].include?('splunk_proxy') %>
+    server {
+      listen <%= @node[:nginx][:listen_port] %>;
+      server_name splunk.<%= @node[:nginx][:host_name] %>;
+
+      location / {
+        rewrite ^(.*)$ https://splunk.<%= @node[:nginx][:host_name] %>$1;
+      }
+    }
+  <% end %>
+
+
   <% if @node[:chef][:roles].include?('proxy') %>
   server {
     listen <%= @node[:nginx][:listen_port] %>;
@@ -112,12 +124,6 @@ http {
       # rewrite ^(.*)$ http://www.ofr.gov$1; #someone fat fingered the dns...
       rewrite ^(.*)$ http://www.<%= @node[:nginx][:host_name] %>$1; # $1 contains '/foo', not 'mydomain.com/foo'
     }
-
-    <% if @node[:chef][:roles].include?('splunk_proxy') %>
-    if ( $host = 'splunk.<%= @node[:nginx][:host_name] %>' ) {
-      rewrite ^(.*)$ https://splunk.<%= @node[:nginx][:host_name] %>$1;
-    }
-    <% end %>
     
     # if ( $host = 'www.federalregister.gov' ) {
     #   rewrite ^(.*)$ http://www.ofr.gov$1; # $1 contains '/foo', not 'mydomain.com/foo'
