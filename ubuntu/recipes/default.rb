@@ -453,3 +453,32 @@ if node[:chef][:roles].include?('proxy') && !node[:chef][:roles].include?('vagra
     mode 0744
   end
 end
+
+
+####################################
+#
+# FR2 SETUP
+#
+####################################
+if (node[:chef][:roles].include?('database') || node[:chef][:roles].include?('worker')) && !node[:chef][:roles].include?('vagrant')
+  
+  dir_to_mount = "#{node[:app][:app_root]}/#{node[:rails][:using_shared] ? 'shared' : ''}"
+  directory dir_to_mount do
+    owner node[:capistrano][:deploy_user]
+    group node[:capistrano][:deploy_user]
+    mode 0744
+    recursive true
+    action :create
+    not_if do File.directory?(dir_to_mount) end
+  end
+
+ 
+  mount dir_to_mount do
+    device "/vol/apps/fr2/shared"
+    fstype "none"
+    options "bind"
+    action [:enable, :mount]
+    # Do not execute if its already mounted (ubunutu/linux only)
+    not_if "cat /proc/mounts | grep #{dir_to_mount}"
+  end
+end
