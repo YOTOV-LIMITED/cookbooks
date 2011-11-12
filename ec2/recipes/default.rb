@@ -24,13 +24,23 @@ directory "/vol" do
   not_if "test -d /vol"
 end
 
-mount "/vol" do
-  device "/dev/sdh"
-  fstype "xfs"
-  options "rw noatime"
-  action [:enable, :mount]
-  # Do not execute if its already mounted (ubunutu/linux only)
-  not_if "cat /proc/mounts | grep /vol"
+if node[:chef][:roles].include?('database') && node[:aws][:ebs][:database]
+  mount_point = node[:aws][:ebs][:database][:mount_point]
+  device_loc  = node[:aws][:ebs][:database][:device]
+elsif node[:chef][:roles].include?('worker') && node[:aws][:ebs][:worker]
+  mount_point = node[:aws][:ebs][:worker][:mount_point]
+  device_loc  = node[:aws][:ebs][:worker][:device]
+end
+
+if mount_point && device_loc
+  mount mount_point do
+    device device_loc
+    fstype "xfs"
+    options "rw noatime"
+    action [:enable, :mount]
+    # Do not execute if its already mounted (ubunutu/linux only)
+    not_if "cat /proc/mounts | grep /vol"
+  end
 end
 
 package 'ec2-api-tools' do
