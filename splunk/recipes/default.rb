@@ -37,14 +37,16 @@ service "splunk" do
   action [:start]
 end
 
-#execute "Listen for data being forwarded" do
-#  command "#{node[:splunk][:bin_path]}/splunk enable listen #{node[:splunk][:reciever][:port]} -auth '#{node[:splunk][:reciever][:username]}':'#{node[:splunk][:reciever][:password]}'"
-#  returns [0,24] #24 indicates the port is already configured to be listened on
-#end
+execute "Listen for data being forwarded" do
+ command "#{node[:splunk][:bin_path]}/splunk enable listen #{node[:splunk][:reciever][:port]} -auth '#{node[:splunk][:reciever][:username]}':'#{node[:splunk][:reciever][:password]}'"
+ returns [0,24] #24 indicates the port is already configured to be listened on
+end
 
 template "#{node[:splunk][:install_path]}/etc/system/local/inputs.conf" do
   source "indexer/inputs.conf.erb"
-  variables :files_to_monitor => node[:splunk][:files_to_monitor]
+  variables :files_to_monitor => node[:splunk][:files_to_monitor],
+            :port             => node[:splunk][:reciever][:port],
+            :tcp_compressed   => true
   notifies :restart, resources(:service => "splunk")
 end
 

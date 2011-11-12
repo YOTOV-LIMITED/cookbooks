@@ -42,6 +42,13 @@ execute "Add server to forward to" do
   returns [0,22] #22 indicates the forward-server is already configured
 end
 
+template "#{node[:splunk][:forwarder][:install_path]}/etc/system/local/outputs.conf" do
+  source "forwarder/outputs.conf.erb"
+  variables :host => node[:splunk][:reciever][:host],
+            :port => node[:splunk][:reciever][:port]
+  notifies :restart, resources(:service => "splunk")
+end
+
 template "#{node[:splunk][:forwarder][:install_path]}/etc/system/local/inputs.conf" do
   source "forwarder/inputs.conf.erb"
   variables :files_to_monitor => node[:splunk][:forwarder][:files_to_monitor]

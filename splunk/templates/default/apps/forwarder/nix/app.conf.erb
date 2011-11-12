@@ -1,0 +1,22 @@
+# Copyright (C) 2005-2011 Splunk Inc. All Rights Reserved.
+#
+# Splunk app configuration file
+#
+
+[install]
+state = <%= @enabled %>
+is_configured = <%= @configured %>
+build = 96252
+
+[package]
+id = unix
+
+[ui]
+is_visible = <%= @visible %>
+label = *NIX
+
+[launcher]
+author=Splunk, Inc.
+description=This is a useful app for helping monitor, manage, and troubleshoot *nix platforms. This app comes with set of scripted inputs for collecting CPU, disk, I/O, memory, log, configuration, and user info. It also provides convenient dashboards, form searches, and alerts to make getting started with Splunk a breeze. 
+version = 4.2.0
+

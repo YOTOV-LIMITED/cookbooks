@@ -1,0 +1,6 @@
+[tcpout]
+defaultGroup=worker_indexer
+
+[tcpout:worker_indexer]
+compressed=true
+server=<%= @host %>:<%= @port %>

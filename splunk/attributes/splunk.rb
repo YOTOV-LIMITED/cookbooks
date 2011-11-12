@@ -17,3 +17,12 @@ default[:splunk][:reciever][:host]     = '127.0.0.1'
 default[:splunk][:reciever][:port]     = 9997
 default[:splunk][:reciever][:username] = ''
 default[:splunk][:reciever][:password] = ''
+
+
+#
+# Forwarder Apps
+#
+default[:splunk][:forwarder][:apps][:app_directory]       = "#{node[:splunk][:forwarder][:install_path]}/etc/apps"
+
+default[:splunk][:forwarder][:apps][:nix][:package_name]  = "splunk_nix_app.tar.gz"
+default[:splunk][:forwarder][:apps][:nix][:app_directory] = "#{node[:splunk][:forwarder][:apps][:app_directory]}/unix"
