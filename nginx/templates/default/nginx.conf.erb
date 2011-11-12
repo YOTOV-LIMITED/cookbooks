@@ -58,6 +58,16 @@ http {
     }
   <% end %>
 
+  <% if @node[:chef][:roles].include?('resque_proxy') %>
+    server {
+      listen <%= @node[:nginx][:listen_port] %>;
+      server_name resque.<%= @node[:nginx][:host_name] %>;
+
+      location / {
+        rewrite ^(.*)$ https://resque.<%= @node[:nginx][:host_name] %>$1;
+      }
+    }
+  <% end %>
 
   <% if @node[:chef][:roles].include?('proxy') %>
   server {
