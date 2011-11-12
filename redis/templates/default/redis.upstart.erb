@@ -1,0 +1,21 @@
+description "Starts and stops redis server"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+expect daemon
+respawn
+
+env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+pre-start script
+  #mkdir -p something
+end script
+
+script
+  su -c '<%= @node[:redis][:bin_path] %>/redis-server <%= @node[:redis][:conf_file] %>' root
+end script
+
+post-stop script
+  pkill redis-server
+end script
