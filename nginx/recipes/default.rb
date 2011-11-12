@@ -89,3 +89,11 @@ if node[:chef][:roles].include?('proxy') && !node[:chef][:roles].include?('vagra
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:images/logotype.png logotype.png"
   end
 end
+
+# add resque logs
+if node[:chef][:roles].include?('resque_proxy')
+  directory "/var/log/nginx/resque.fr2.criticaljuncture.org" do
+    action :create
+    recursive true
+  end
+end
