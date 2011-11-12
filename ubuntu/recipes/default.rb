@@ -372,10 +372,12 @@ template "/etc/hosts" do
   mode 0644
 end
 
-template "/etc/hostname" do
-  source "etc_hostname.erb"
-  variables :hostname => @node[:ubuntu][:hostname]
-  mode 0644
+if node[:ubuntu][:hostname] && !node[:ubuntu][:hostname].empty?
+  template "/etc/hostname" do
+    source "etc_hostname.erb"
+    variables :hostname => node[:ubuntu][:hostname]
+    mode 0644
+  end
 end
 
 ####################################
