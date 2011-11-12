@@ -103,6 +103,14 @@ unless Chef::Config[:solo]
   end
 end
 
+
+service "mysql" do
+  action :start
+  not_if do
+    system("status mysql | grep -q 'mysql start/running'")
+  end
+end
+
 execute "mysql-install-privileges" do
   command "/usr/bin/mysql -u root -p#{node[:mysql][:server_root_password]} < /etc/mysql/grants.sql"
   action :nothing

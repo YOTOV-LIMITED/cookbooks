@@ -18,15 +18,16 @@
 #
 
 
-if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('database') )
-  
+if node[:ec2] && node[:chef][:roles].include?('database')
+  include_recipe "ec2"
+
   service "mysql" do
     action :stop
     not_if do
       system("status mysql | grep -q 'mysql stop/waiting'")
     end
   end
-  
+ 
   unless FileTest.directory?(node[:mysql][:ec2_path])
     execute "install-mysql" do
       command "mv #{node[:mysql][:datadir]} #{node[:mysql][:ec2_path]}"
@@ -92,35 +93,19 @@ if node[:ec2] && ( node[:chef][:roles].include?('staging') || node[:chef][:roles
 
   # we're using ebs backed images which have a small volume - so we mount this to the
   # non-persistent /mnt volume for added space.
-  # we're setting mysql to /tmp/mysql for temporary tables.
   directory "/mnt/tmp/mysql" do
-    owner "root"
-    group "root"
+    owner "mysql"
+    group "mysql"
     mode 0777
     action :create
     recursive true
   end
   
-  directory "/tmp/mysql" do
-    owner "root"
-    group "root"
-    mode 0777
-    action :create
-    recursive true
-  end
-  
-  mount "/tmp/mysql" do
-    device "/mnt/tmp/mysql"
-    fstype "none"
-    options "bind"
-    action [:enable, :mount]
-    # Do not execute if its already mounted (ubunutu/linux only)
-    not_if "cat /proc/mounts | grep /tmp/mysql"
-  end
-  
-
   service "mysql" do
-    #action :start
+    action :start
+    not_if do
+      system("status mysql | grep -q 'mysql start/running'")
+    end
   end
 
 end

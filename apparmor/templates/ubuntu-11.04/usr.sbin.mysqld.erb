@@ -39,5 +39,9 @@
   /usr/lib/mysql/plugin/ r,
   /usr/lib/mysql/plugin/* mr,  
   <% end %>
+
+  <% if @node[:mysql][:tmpdir] %>
+    <%=@node[:mysql][:tmpdir]%>/** rwk,
+  <% end %>
 }
 
