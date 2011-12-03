@@ -106,7 +106,14 @@ sub vcl_recv {
   <% if @node[:chef][:roles].include?('proxy') %>
     if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html|/uploads)") {
       set req.backend = static_server;
-      return (lookup);
+
+      # Fetch from cache unless explicitly skipping cache
+      if (req.http.Cookie ~ "skip_cache=<%= @node[:varnish][:skip_cache_key] %>") {
+        return (pass);
+      } else {  
+        return (lookup);
+      }
+
     <% if @node[:varnish][:blog_proxy_host] %>
     # logged in users must always pass
     }else if( req.url ~ "^/blog/wp-(login|admin)" ){
@@ -144,8 +151,12 @@ sub vcl_recv {
     # Prevent duplication of caches
     set req.http.host = "www.<%= @node[:varnish][:proxy_host_name] %>";
     
-    # Check to see if cached
-    return (lookup);
+    # Fetch from cache unless explicitly skipping cache
+    if (req.http.Cookie ~ "skip_cache=<%= @node[:varnish][:skip_cache_key] %>") {
+      return (pass);
+    } else {  
+      return (lookup);
+    }
 }
 
 sub vcl_fetch {
