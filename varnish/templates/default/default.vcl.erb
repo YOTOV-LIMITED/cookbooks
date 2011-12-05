@@ -64,7 +64,7 @@ sub vcl_recv {
       req.request != "POST" &&
       req.request != "OPTIONS" &&
       req.request != "DELETE") {
-        return (pipe);
+        return (error);
     }
 
     # ab testing - check cookie to see if group has been assigned
