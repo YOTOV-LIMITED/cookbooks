@@ -203,35 +203,19 @@ http {
       rewrite  /Catalog.aspx           http://www.ofr.gov/Catalog.aspx           permanent;
       rewrite  /AboutUs.aspx           http://www.ofr.gov/AboutUs.aspx           permanent;
       rewrite  /ContactUs.aspx         http://www.ofr.gov/ContactUs.aspx         permanent;
+
+      # redirect everything to SSL
+      rewrite ^/(.*)                   https://<%= @node[:nginx][:host_name] %>/$1 permanent;
       <% end %>
+      
       
       client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
       
       
-      <% if @node[:nginx][:varnish_proxy] %>
-      # auth_basic            "Restricted";
-      # auth_basic_user_file  auth/htpasswd;
-
-      # set cache control
-      expires 5m;
-
-      proxy_pass             http://varnish;
-      proxy_redirect         http://varnish/ http://$host:$server_port/;
-      proxy_set_header       Host $host;
-      proxy_set_header       X-Real-IP $remote_addr;
-      proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header       X-Client-Verify SUCCESS;
-      proxy_set_header       X-SSL-Subject $ssl_client_s_dn;
-      proxy_set_header       X-SSL-Issuer  $ssl_client_i_dn;
-      proxy_intercept_errors on;
-      <% elsif @node[:chef][:roles].include?('static') %>
+      <% if @node[:chef][:roles].include?('static') %>
       
       # set cache control
       expires 1y;
-      
-      # mark these as public so they get cached on SSL connections in FF
-      # see http://blog.pluron.com/2008/07/why-you-should.html
-      add_header Cache-Control public;
       
       # doc root
       root <%= @node[:nginx][:doc_root] %>;
@@ -293,6 +277,10 @@ http {
 
     location ~* ^(/images|/javascripts|/stylesheets|/uploads) {
        expires 1y;
+
+       # mark these as public so they get cached on SSL connections in FF
+       # see http://blog.pluron.com/2008/07/why-you-should.html
+       add_header Cache-Control public;
        
        proxy_pass             http://varnish;
        proxy_redirect         http://varnish/ http://$host:$server_port/;
@@ -320,7 +308,13 @@ http {
       proxy_intercept_errors on;
       proxy_set_header       X-Forwarded-Proto 'https';
     }
-    
+
+    error_page 502 503 /502_503_proxy.html;  
+    location = /502_503_proxy.html {  
+        root  <%= @node[:nginx][:doc_root] %>;  
+    }
+
+    client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
   }
   <% end %>
 
