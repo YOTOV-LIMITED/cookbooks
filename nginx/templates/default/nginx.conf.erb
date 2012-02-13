@@ -270,10 +270,6 @@ http {
 
     access_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-access.log;
     error_log /var/log/nginx/<%= @node[:nginx][:host_name] %>/ssl-error.log;
-    
-    location /robots.txt {
-      root  <%= @node[:nginx][:doc_root] %>;
-    }
 
     location ~* ^(/images|/javascripts|/stylesheets|/uploads) {
        expires 1y;
