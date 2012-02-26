@@ -104,7 +104,7 @@ sub vcl_recv {
   
     # set the backend server based on request (if multi-server stack)
   <% if @node[:chef][:roles].include?('proxy') %>
-    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html|/uploads)") {
+    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/page-images|/articles/xml|/regulations/html|/uploads)") {
       set req.backend = static_server;
 
       # Fetch from cache unless explicitly skipping cache
