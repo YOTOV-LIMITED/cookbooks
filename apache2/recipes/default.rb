@@ -170,7 +170,7 @@ node[:apache][:vhosts].each do |vhost|
         :server_aliases => vhost[:server_aliases],
         :docroot        => vhost[:docroot],
         :name           => vhost[:name],
-        :vhost_port     => node[:apache][:vhost_port],
+        :vhost_port     => vhost[:port],
         :apache_log_dir => node[:apache][:log_dir],
         :rewrite_conditions => vhost[:rewrite_conditions]
       })

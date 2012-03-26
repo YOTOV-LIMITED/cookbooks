@@ -20,6 +20,13 @@ backend app_server_<%= i+1 %> {
 }
 <% end %>
 
+<% @node[:varnish][:my_fr2_proxy_host].each_with_index do |host, i| %>
+backend my_fr2_server_<%= i+1 %> {
+  .host = "<%= host %>";
+  .port = "<%= @node[:varnish][:my_fr2_proxy_port] %>";
+}
+<% end %>
+
 <% if @node[:varnish][:blog_proxy_host] %>
 backend blog_server {
   .host = "<%= @node[:varnish][:blog_proxy_host] %>";
@@ -36,6 +43,12 @@ backend static_server {
 director app_director round-robin {
   <% @node[:varnish][:app_proxy_host].each_with_index do |host, i| %>
     { .backend = app_server_<%= i+1 %>; }
+  <% end %>
+}
+
+director my_fr2_director round-robin {
+  <% @node[:varnish][:my_fr2_proxy_host].each_with_index do |host, i| %>
+    { .backend = my_fr2_server_<%= i+1 %>; }
   <% end %>
 }
 <% end %>
@@ -104,7 +117,26 @@ sub vcl_recv {
   
     # set the backend server based on request (if multi-server stack)
   <% if @node[:chef][:roles].include?('proxy') %>
-    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html|/uploads)") {
+    if (req.url ~ "^/my/assets/") {
+      set req.backend = static_server;
+      return(lookup);
+
+      # Fetch from cache unless explicitly skipping cache
+      if (req.http.Cookie ~ "skip_cache=<%= @node[:varnish][:skip_cache_key] %>") {
+        return (pass);
+      } else {  
+        return (lookup);
+      }
+
+    } else if (req.url ~ "^/my/") {
+      set req.backend = my_fr2_director;
+      
+      if (req.url ~ "^/my/special/user_utils" && ( req.http.Cookie ~ "document_numbers" || req.http.Cookie ~ "_my_fr2_session") ) {
+        return(pass);
+      } else {
+        return(lookup);
+      }
+    } else if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html|/uploads)") {
       set req.backend = static_server;
 
       # Fetch from cache unless explicitly skipping cache
@@ -170,7 +202,9 @@ sub vcl_fetch {
     set beresp.grace = 24h;
     
     # Directly serve static content
-    if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html)") {
+    if (req.url ~ "^/my/assets/") {
+        return(deliver);
+    } else if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/xml|/regulations/html)") {
         return(deliver);
     }
     # ESI process the rest
@@ -206,6 +240,12 @@ sub vcl_hash {
     if( req.url ~ "^/(articles|public-inspection)/search/header" && req.http.Cookie ~ "javascript_enabled=1" ) {
         # add this fact to the hash
         set req.hash += "javascript enabled";
+    }
+
+    # Hash differently based on presence of expect_logged_in cookie.
+    if( req.url ~ "^/my/special/navigation" && req.http.Cookie ~ "expect_logged_in=1" ) {
+        # add this fact to the hash
+        set req.hash += "user logged in"; 
     }
     
     return(hash);

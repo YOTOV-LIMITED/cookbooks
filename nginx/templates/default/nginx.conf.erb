@@ -194,6 +194,29 @@ http {
     location /OFRUpload {
       rewrite ^/(OFRUpload($|/.*)) http://www.ofr.gov/$1  permanent;
     }
+
+    <% if @node[:chef][:roles].include?('my_fr2') %>
+    location ^~ /my/ {
+
+      client_max_body_size 5M;
+
+      # set cache control
+      expires 1y;
+
+      # mark these as public so they get cached on SSL connections in FF
+      # see http://blog.pluron.com/2008/07/why-you-should.html
+      add_header Cache-Control public;
+
+      # doc root
+      root /var/www/apps/my_fr2/public;
+
+      # If the file exists as a static file serve it directly without
+      # running all the other rewrite tests on it
+      if (-f $request_filename) {
+        break;
+      }
+    }
+    <% end %>
     
     location / {
       <% if @node[:nginx][:varnish_proxy] %>
