@@ -314,8 +314,6 @@ http {
     }
 
     location / {
-      expires 5m;
-
       proxy_pass             http://varnish;
       proxy_redirect         http://varnish/ http://$host:$server_port/;
       proxy_set_header       Host $host;

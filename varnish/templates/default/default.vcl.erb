@@ -119,7 +119,6 @@ sub vcl_recv {
   <% if @node[:chef][:roles].include?('proxy') %>
     if (req.url ~ "^/my/assets/") {
       set req.backend = static_server;
-      return(lookup);
 
       # Fetch from cache unless explicitly skipping cache
       if (req.http.Cookie ~ "skip_cache=<%= @node[:varnish][:skip_cache_key] %>") {
@@ -133,8 +132,6 @@ sub vcl_recv {
       
       if (req.url ~ "^/my/special/user_utils" && ( req.http.Cookie ~ "document_numbers" || req.http.Cookie ~ "_my_fr2_session") ) {
         return(pass);
-      } else {
-        return(lookup);
       }
     } else if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/page-images|/articles/xml|/regulations/html|/uploads)") {
       set req.backend = static_server;
