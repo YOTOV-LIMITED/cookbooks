@@ -24,6 +24,15 @@ backend app_server_<%= i+1 %> {
 backend my_fr2_server_<%= i+1 %> {
   .host = "<%= host %>";
   .port = "<%= @node[:varnish][:my_fr2_proxy_port] %>";
+  <% unless @node[:chef][:roles].include?('vagrant') %>
+  .probe = {
+             .url = "<%= @node[:varnish][:my_fr2_proxy_host_probe_url] %>";
+             .interval = 5s;
+             .timeout = 1 s;
+             .window = 5;
+             .threshold = 3;
+  }
+  <% end %>
 }
 <% end %>
 
