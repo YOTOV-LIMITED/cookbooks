@@ -22,11 +22,9 @@
 include_recipe "rails::logrotate"
 
 %w{ rails actionmailer actionpack activerecord activesupport activeresource }.each do |rails_gem|
-  gem_package rails_gem do
-    if node[:rails][:version]
-      version node[:rails][:version]
-      action :install
-    else
+  node[:rails][:versions].each do |rails_version|
+    gem_package rails_gem do  
+      version rails_version
       action :install
     end
   end
@@ -43,16 +41,49 @@ end
 if node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
   template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config/database.yml" do
     variables :environment   => node[:rails][:environment],
+              :adapter       => "mysql",
               :host          => node[:mysql][:database_server_fqdn], 
               :port          => node[:mysql][:server_port],
               :database_name => node[:mysql][:database_name],
               :password      => node[:mysql][:server_root_password]
-    source "app_server.database.yml.erb"
+    source "database/app_server.mysql.yml.erb"
+    owner "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+    mode 0644
+  end
+
+  # MY FR #
+  [ node[:app][:my_fr_root], "#{node[:app][:my_fr_root]}/config" ].each do |my_fr_dir|
+    directory my_fr_dir do
+      owner "#{node[:capistrano][:deploy_user]}"
+      group "#{node[:capistrano][:deploy_user]}"
+      mode 0755
+      action :create
+      recursive true
+    end
+  end
+
+  template "#{node[:app][:my_fr_root]}/config/database.yml" do
+    variables :environment   => node[:rails][:environment],
+              :adapter       => "mysql2",
+              :host          => node[:mysql][:database_server_fqdn], 
+              :port          => node[:mysql][:server_port],
+              :database_name => node[:mysql][:my_fr_database_name],
+              :password      => node[:mysql][:server_root_password]
+    source "database/app_server.mysql.yml.erb"
     mode 0644
   end
 end
 
 if node[:rails][:using_mongoid] == 'true' && ( node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker') )
+  directory "#{node[:app][:app_root]}/#{node[:rails][:using_shared] == 'true' ? 'current/' : ''}config" do
+    owner "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+    mode 0755
+    action :create
+    recursive true
+  end
+
   template "#{node[:app][:app_root]}/#{node[:rails][:using_shared] == 'true' ? 'current/' : ''}config/mongoid.yml" do
     variables :environment   => node[:rails][:environment],
               :host          => node[:mongodb][:bind_address], 
@@ -76,6 +107,7 @@ end
 # end
 
 unless node[:chef][:roles].include?('vagrant')
+  # FR2 #
   execute "Get private config file amazon.yml" do
     cwd "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/config"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:amazon.yml amazon.yml"
@@ -94,6 +126,32 @@ unless node[:chef][:roles].include?('vagrant')
     user "#{node[:capistrano][:deploy_user]}"
     group "#{node[:capistrano][:deploy_user]}"
   end
+
+  # FR2, MY FR #
+  [ "#{node[:app][:app_root]}/shared", node[:app][:my_fr_root] ].each do |app_root|
+    execute "Get private config file sendgrid.yml" do
+      cwd "#{app_root}/config"
+      command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:sendgrid.yml sendgrid.yml"
+      user "#{node[:capistrano][:deploy_user]}"
+      group "#{node[:capistrano][:deploy_user]}"
+    end
+  end
+
+  # FR2 #
+  execute "Get FR2 private config file secrets.yml" do
+    cwd "#{node[:app][:app_root]}/shared/config"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:secrets.yml secrets.yml"
+    user "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+  end
+  # MY FR #
+  execute "Get MY FR private config file secrets.yml" do
+    cwd "#{node[:app][:my_fr_root]}/config"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:my_fr2_secrets.yml secrets.yml"
+    user "#{node[:capistrano][:deploy_user]}"
+    group "#{node[:capistrano][:deploy_user]}"
+  end
+
 end
 
 gem_package "bundler" do
@@ -104,23 +162,23 @@ link "/usr/bin/bundle" do
   to "#{node[:ruby_enterprise][:install_path]}/bin/bundle"
 end
 
-execute "bundle install" do
-  command "bundle install --deployment --gemfile #{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/Gemfile --without development test"
-  user "#{node[:capistrano][:deploy_user]}"
-  group "#{node[:capistrano][:deploy_user]}"
-  action :nothing
-end
+#execute "bundle install" do
+  #command "bundle install --deployment --gemfile #{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/Gemfile --without development test"
+  #user "#{node[:capistrano][:deploy_user]}"
+  #group "#{node[:capistrano][:deploy_user]}"
+  #action :nothing
+#end
 
-unless node[:chef][:roles].include?('vagrant')
-  %w(Gemfile Gemfile.lock).each do |f|
-    template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
-      source "#{f}"
-      notifies :run, resources(:execute => "bundle install")
-    end
+#unless node[:chef][:roles].include?('vagrant')
+  #%w(Gemfile Gemfile.lock).each do |f|
+    #template "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
+      #source "#{f}"
+      #notifies :run, resources(:execute => "bundle install")
+    #end
   
-    file "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
-      owner "#{node[:capistrano][:deploy_user]}"
-      group "#{node[:capistrano][:deploy_user]}"
-    end
-  end
-end
+    #file "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/shared/tmp/#{f}" do
+      #owner "#{node[:capistrano][:deploy_user]}"
+      #group "#{node[:capistrano][:deploy_user]}"
+    #end
+  #end
+#end
