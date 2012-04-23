@@ -23,8 +23,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include_recipe "apache2"
 include_recipe "passenger_enterprise"
-# include_recipe "apache2"
+
 
 %w{ apache2-threaded-dev libapr1-dev libaprutil1-dev }.each do |pkg|
   package pkg do
