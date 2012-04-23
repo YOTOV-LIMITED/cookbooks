@@ -3,22 +3,26 @@
 #
 
 <% if @node[:chef][:roles].include?('database') %>
-deb http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
-deb-src http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
+#deb http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
+#deb-src http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
 
-deb http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
-deb-src http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
+#deb http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
+#deb-src http://<%= @ec2_region %>.ec2.old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
 <% else %>
-deb http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
-deb-src http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
+#deb http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
+#deb-src http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
 
-deb http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
-deb-src http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
+#deb http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
+#deb-src http://old-releases.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
 <% end %>
 
+deb http://<%= @ec2_region %>.ec2.archive.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
+deb-src http://<%= @ec2_region %>.ec2.archive.ubuntu.com/ubuntu/ <%= @code_name %> main universe multiverse
+deb http://<%= @ec2_region %>.ec2.archive.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
+deb-src http://<%= @ec2_region %>.ec2.archive.ubuntu.com/ubuntu/ <%= @code_name %>-updates main universe multiverse
 
 # 
 # Security updates 
 #
-#deb http://security.ubuntu.com/ubuntu <%= @code_name %>-security main universe
-#deb-src http://security.ubuntu.com/ubuntu <%= @code_name %>-security main universe
+deb http://security.ubuntu.com/ubuntu <%= @code_name %>-security main universe
+deb-src http://security.ubuntu.com/ubuntu <%= @code_name %>-security main universe

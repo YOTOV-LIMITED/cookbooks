@@ -54,14 +54,6 @@ if node[:ec2]
   end  
 end
 
-# 10-gen source for MongoDB
-# template "/etc/apt/sources.list.d/mongo.list" do
-#   mode 0644
-#   variables :ubuntu_version => node[:platform_version]
-#   notifies :run, resources(:execute => "apt-get update"), :immediately
-#   source "apt/mongo.list.erb"
-# end
-
 ####################################
 #
 # Add libraries we'll need
@@ -96,6 +88,13 @@ end
 # used by apache and ngix for creating passwords for basic auth
 package "apache2-utils" do
   action :install
+end
+
+# used for spell checking in search suggestions
+%w(aspell libaspell-dev aspell-en).each do |pkg|
+  package pkg do
+    action :install
+  end
 end
 
 if node[:ec2]
@@ -471,7 +470,7 @@ if (node[:chef][:roles].include?('database') || node[:chef][:roles].include?('wo
     mode 0744
     recursive true
     action :create
-    not_if do File.directory?(dir_to_mount) end
+    #not_if do File.directory?(dir_to_mount) end
   end
 
  

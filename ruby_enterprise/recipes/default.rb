@@ -25,7 +25,7 @@
 
 include_recipe "build-essential"
 
-%w{ libssl-dev libreadline5-dev }.each do |pkg|
+%w{ libssl-dev libreadline6-dev }.each do |pkg|
   package pkg
 end
 
