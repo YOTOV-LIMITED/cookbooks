@@ -11,11 +11,11 @@
 
 # Find the matching regulations.gov URL for articles tardily added to regs.gov 
 # runs every morning once
-0,30 6 	* * *	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:entries:import:regulations_dot_gov:tardy 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/reg_gov_url_import_tardy.log
+0 6 	* * *	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:entries:import:regulations_dot_gov:tardy 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/reg_gov_url_import_tardy.log
 
 # Confirm URLs and openness of comments that have a valid comment URL
 # runs every morning once
-0,30 5 	* * *	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:entries:import:regulations_dot_gov:open_comments 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/reg_gov_url_import_open_comments.log
+0 5 	* * *	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && /usr/bin/rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH content:entries:import:regulations_dot_gov:open_comments 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/reg_gov_url_import_open_comments.log
 
 # Expire pages warning of late content at 9AM
 # runs at 9AM EDT M-F
