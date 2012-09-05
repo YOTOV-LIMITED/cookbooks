@@ -102,6 +102,12 @@ if node[:ec2]
   package "ec2-consistent-snapshot" do
     action :install
   end
+
+  execute "add EC2 CPAN module for ec2-consistent-snapshot" do
+    command "PERL_MM_USE_DEFAULT=1 cpan Net::Amazon::EC2"
+    not_if "/usr/bin/ec2-consistent-snapshot --help | grep 'Usage'"
+  end
+
   
   # used for getting newly spun up servers up to date
   # ie pull from git, set proper backup cron jobs, etc.
@@ -268,14 +274,18 @@ if node[:ec2]
       
       template "/opt/backups/scripts/email_feature_backup.rb" do
         variables :mysql_user      => 'root', 
-                  :mysql_passwd    => node[:mysql][:server_root_password]
+                  :mysql_passwd    => node[:mysql][:server_root_password],
+                  :s3sync_cmd      => "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb",
+                  :server_env      => node[:rails][:environment]
         source "cron/roles/database/email_feature_backup.erb"
         mode 0744
       end
       
       template "/opt/backups/scripts/wordpress_backup.rb" do
         variables :mysql_user      => node[:wordpress][:database_user], 
-                  :mysql_passwd    => node[:wordpress][:database_password]
+                  :mysql_passwd    => node[:wordpress][:database_password],
+                  :s3sync_cmd      => "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb",
+                  :server_env      => node[:rails][:environment]
         source "cron/roles/database/wordpress_backup.erb"
         mode 0744
       end
