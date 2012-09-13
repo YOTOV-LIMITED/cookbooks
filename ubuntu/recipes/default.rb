@@ -477,7 +477,7 @@ if (node[:chef][:roles].include?('database') || node[:chef][:roles].include?('wo
   directory dir_to_mount do
     owner node[:capistrano][:deploy_user]
     group node[:capistrano][:deploy_user]
-    mode 0744
+    mode 0755
     recursive true
     action :create
     #not_if do File.directory?(dir_to_mount) end
