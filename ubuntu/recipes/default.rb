@@ -289,6 +289,17 @@ if node[:ec2]
         source "cron/roles/database/wordpress_backup.erb"
         mode 0744
       end
+
+      if node[:mysql][:my_fr_database_name]
+        template "/opt/backups/scripts/my_fr_backup.rb" do
+          variables :mysql_user      => 'root', 
+                    :mysql_passwd    => node[:mysql][:server_root_password],
+                    :s3sync_cmd      => "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb",
+                    :server_env      => node[:rails][:environment]
+          source "cron/roles/database/my_fr_backup.erb"
+          mode 0744
+        end
+      end
     elsif node[:chef][:roles].include?('worker')
       template "/etc/cron.d/ebs_backup" do
         variables :ebs_volume_id   => node[:aws][:ebs][:worker][:volume_id],

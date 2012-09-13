@@ -12,4 +12,5 @@
 # Backup our more volatile tables more often
 23 * 	* * *   root   ruby /opt/backups/scripts/email_feature_backup.rb >> <%=@log%>  2>&1
 27 * 	* * *   root   ruby /opt/backups/scripts/wordpress_backup.rb >> <%=@log%>  2>&1
+32 * 	* * *   root   ruby /opt/backups/scripts/my_fr_backup.rb >> <%=@log%>  2>&1
 
