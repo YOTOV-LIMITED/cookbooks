@@ -467,16 +467,6 @@ if node[:chef][:roles].include?('blog')
   
 end
 
-if node[:chef][:roles].include?('proxy') && !node[:chef][:roles].include?('vagrant')
-  template "#{node[:app][:app_root]}/current/public/robots.txt" do
-    source "robots.ssl.txt.erb"
-    owner "deploy"
-    group "deploy"
-    mode 0744
-  end
-end
-
-
 ####################################
 #
 # FR2 SETUP
