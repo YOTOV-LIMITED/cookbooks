@@ -4,9 +4,9 @@ C{
   #include <time.h>
 }C
 
-<% @node[:varnish][:app_proxy_host].each_with_index do |host, i| %>
-backend app_server_<%= i+1 %> {
-  .host = "<%= host %>";
+<% @node[:varnish][:app_proxy_servers].each do |server| %>
+backend <%= server[:alias] %> {
+  .host = "<%= server[:fqdn] %>";
   .port = "<%= @node[:varnish][:app_proxy_port] %>";
   <% unless @node[:chef][:roles].include?('vagrant') %>
   .probe = {
@@ -20,9 +20,9 @@ backend app_server_<%= i+1 %> {
 }
 <% end %>
 
-<% @node[:varnish][:my_fr2_proxy_host].each_with_index do |host, i| %>
-backend my_fr2_server_<%= i+1 %> {
-  .host = "<%= host %>";
+<% @node[:varnish][:my_fr2_proxy_server].each do |server| %>
+backend <%= server[:alias] %> {
+  .host = "<%= server[:fqdn] %>";
   .port = "<%= @node[:varnish][:my_fr2_proxy_port] %>";
   <% unless @node[:chef][:roles].include?('vagrant') %>
   .probe = {
@@ -58,14 +58,14 @@ backend static_server {
 }
 
 director app_director round-robin {
-  <% @node[:varnish][:app_proxy_host].each_with_index do |host, i| %>
-    { .backend = app_server_<%= i+1 %>; }
+  <% @node[:varnish][:app_proxy_servers].each do |server| %>
+    { .backend = <%= server[:alias] %>; }
   <% end %>
 }
 
 director my_fr2_director round-robin {
-  <% @node[:varnish][:my_fr2_proxy_host].each_with_index do |host, i| %>
-    { .backend = my_fr2_server_<%= i+1 %>; }
+  <% @node[:varnish][:my_fr2_proxy_servers].each do |server| %>
+    { .backend = <%= server[:alias] %>; }
   <% end %>
 }
 <% end %>
@@ -165,9 +165,9 @@ sub vcl_recv {
     }else if( req.url ~ "^/blog/wp-(login|admin)" ){
         set req.backend = blog_server;
         return (pass);
-    } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/layout/navigation_page_list)") {
+        } else if (req.url ~ "^(/blog|/policy|/learn|/layout/footer_page_list|/layout/homepage_post_list|/layout/navigation_page_list)") {
         set req.backend = blog_server;
-        
+
         # Don't cache wordpress pages if logged in to wp
         if (req.http.Cookie ~ "wordpress_logged_in_" || req.http.Cookie ~ "comment_author_") {
             return (pass);
