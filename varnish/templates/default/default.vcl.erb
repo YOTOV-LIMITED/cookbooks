@@ -43,6 +43,14 @@ backend blog_server {
 }
 <% end %>
 
+<% if @node[:varnish][:iodocs_proxy_host] %>
+backend iodocs_server {
+  .host = "<%= @node[:varnish][:iodocs_proxy_host] %>";
+  .port = "<%= @node[:varnish][:iodocs_proxy_port] %>";
+}
+<% end %>
+
+
 <% if @node[:chef][:roles].include?('proxy') %>
 backend static_server {
   .host = "<%= @node[:varnish][:static_proxy_host] %>";
@@ -165,6 +173,13 @@ sub vcl_recv {
             return (pass);
         }
     <% end %>
+
+    <% if @node[:varnish][:iodocs_proxy_host] %>
+    } else if (req.url ~ "^/developers/api/v1") {
+      set req.backend = iodocs_server;
+      return (lookup);
+    <% end %>
+
     } else {
       set req.backend = app_director;
     }  
