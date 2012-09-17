@@ -225,6 +225,9 @@ LogFormat "%h \"%{X-Forwarded-For}i\" %t %>s %I %b %D \"%U\" \"%q\" \"%{User-age
 <% if @node[:apache][:my_fr2_port] %>
 # my_fr2 port
 Listen <%= @node[:apache][:my_fr2_port] %>
+
+# shared server using named virtual hosts
+NameVirtualHost *:8080
 <% end %>
 
 # Include generic snippets of statements
