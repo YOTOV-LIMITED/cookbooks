@@ -230,7 +230,9 @@ http {
       # redirect everything to SSL
       rewrite ^/(.*)                   https://<%= @node[:nginx][:host_name] %>/$1 permanent;
       <% end %>
-      
+
+      # rewrite /developers to be server from the blog
+      rewrite ^/developers /learn\/developers last;
       
       client_max_body_size <%= @node[:nginx][:client_max_body_size] %>;
       
