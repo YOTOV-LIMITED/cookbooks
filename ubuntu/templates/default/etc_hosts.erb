@@ -4,11 +4,15 @@
 127.0.0.1 <%= @node[:fqdn] %> vagrant
 <% end %>
 
-<% if @node[:chef][:roles].include?('app') %>
-127.0.0.1 app.fr2.ec2.internal app
+# auto generated for internal usage
+<% node[:ubuntu][:app_servers].each do |server| %>
+  <%= server[:ip] %> <%= server[:fqdn] %> <%= server[:alias] %>
 <% end %>
 
-# auto generated for internal usage
+<% node[:ubuntu][:my_fr2_servers].each do |server| %>
+  <%= server[:ip] %> <%= server[:fqdn] %> <%= server[:alias] %>
+<% end %>
+
 <% node[:ubuntu][:servers].each do |server| %>
 <%= server[:ip] %> <%= server[:fqdn] %> <%= server[:alias] %>
 <% end %>
