@@ -20,7 +20,7 @@ backend <%= server[:alias] %> {
 }
 <% end %>
 
-<% @node[:varnish][:my_fr2_proxy_server].each do |server| %>
+<% @node[:varnish][:my_fr2_proxy_servers].each do |server| %>
 backend <%= server[:alias] %> {
   .host = "<%= server[:fqdn] %>";
   .port = "<%= @node[:varnish][:my_fr2_proxy_port] %>";
