@@ -193,7 +193,6 @@ template "/home/deploy/.ssh/authorized_keys" do
   variables :private_key => node[:ubuntu][:users][:deploy][:authorized_keys]
   mode 0600
   action :create
-  not_if do File.exists?("/home/deploy/.ssh/authorized_keys") end
 end
 
 template "/home/deploy/.ssh/id_rsa" do
@@ -203,7 +202,6 @@ template "/home/deploy/.ssh/id_rsa" do
   variables :private_key => node[:ubuntu][:users][:deploy][:private_key]
   mode 0600
   action :create
-  not_if do File.exists?("/home/deploy/.ssh/id_rsa") end
 end
 
 # add deploy to sudoers without password required
