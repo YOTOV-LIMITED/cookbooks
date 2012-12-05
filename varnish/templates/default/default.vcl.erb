@@ -144,7 +144,7 @@ sub vcl_recv {
         return (lookup);
       }
 
-    } else if (req.url ~ "^/my/") {
+    } else if (req.url ~ "^/my(/|$)") {
       set req.backend = my_fr2_director;
       
       if (req.url ~ "^/my/special/user_utils" && ( req.http.Cookie ~ "document_numbers" || req.http.Cookie ~ "_my_fr2_session") ) {
