@@ -1,0 +1,19 @@
+description "node.js <%= @name %> server"
+
+start on started mountall
+stop on shutdown
+
+# Automatically Respawn:
+respawn
+respawn limit 99 5
+
+expect daemon
+
+script
+    export HOME="<%= @user_home %>"
+    exec sudo -u <%= @user %> /usr/local/bin/node <%= @script %>  <%= @args %> >> /var/log/<%= @name %>.log 2>&1
+end script
+
+post-start script
+    echo "`date`: node-<%= @name %> (re)started" >> /var/log/<%= @name %>.log 2>&1
+end script
