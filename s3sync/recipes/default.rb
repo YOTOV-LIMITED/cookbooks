@@ -57,14 +57,3 @@ directory "#{node[:s3sync][:ssl_cert_dir]}" do
   recursive true
 end
 
-remote_file "#{node[:s3sync][:ssl_cert_dir]}/ssl.certs.shar" do
-  source "http://mirbsd.mirsolutions.de/cvs.cgi/~checkout~/src/etc/ssl.certs.shar"
-  not_if { ::File.exists?("#{node[:s3sync][:ssl_cert_dir]}/ssl.certs.shar") }
-end
-
-bash "Install s3 Certs" do
-  cwd "#{node[:s3sync][:ssl_cert_dir]}"
-  code <<-EOH
-  sh ssl.certs.shar
-  EOH
-end
