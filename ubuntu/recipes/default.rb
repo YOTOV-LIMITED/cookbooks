@@ -85,6 +85,11 @@ package "xpdf" do
   action :install
 end
 
+# secure deletion of things that are secure
+package "secure-delete" do
+  action :install
+end
+
 # used by apache and ngix for creating passwords for basic auth
 package "apache2-utils" do
   action :install
@@ -190,7 +195,7 @@ template "/home/deploy/.ssh/authorized_keys" do
   source "users/authorized_keys.erb"
   owner 'deploy'
   group 'deploy'
-  variables :private_key => node[:ubuntu][:users][:deploy][:authorized_keys]
+  variables :authorized_keys => node[:ubuntu][:users][:deploy][:authorized_keys]
   mode 0600
   action :create
 end
@@ -251,7 +256,7 @@ if node[:ec2]
   directory "/opt/backups/scripts" do
     owner 'root'
     group 'root'
-    mode 0744
+    mode 0755
     recursive true
     action :create
     not_if do File.directory?("/opt/backups/scripts") end
@@ -280,8 +285,8 @@ if node[:ec2]
       end
       
       template "/opt/backups/scripts/wordpress_backup.rb" do
-        variables :mysql_user      => node[:wordpress][:database_user], 
-                  :mysql_passwd    => node[:wordpress][:database_password],
+        variables :mysql_user      => 'root', 
+                  :mysql_passwd    => node[:mysql][:server_root_password],
                   :s3sync_cmd      => "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb",
                   :server_env      => node[:rails][:environment]
         source "cron/roles/database/wordpress_backup.erb"
@@ -424,45 +429,13 @@ remote_file "/etc/ssh/ssh_config" do
   notifies :restart, resources(:service => "ssh")
 end
 
-if node[:chef][:roles].include?('blog') 
-  template "#{node[:app][:blog_root]}/config/wp-config.yml" do
-    source "wp-config.yml.erb"
-    owner "root"
-    group "root"
-    mode 0644
-    variables :host           => node[:mysql][:database_server_fqdn], 
-              :port           => node[:mysql][:server_port],
-              :database_name  => node[:wordpress][:database_name],
-              :database_user  => node[:wordpress][:database_user],
-              :password       => node[:wordpress][:database_password],
-              :wordpress_keys => node[:wordpress][:keys]
-  end
-  
-  template "#{node[:app][:blog_root]}/config/wp-options.local.yml" do
-    source "wp-options.local.yml.erb"
-    owner "root"
-    group "root"
-    mode 0644
-    variables :app_url => "http://www.#{node[:app][:url]}/blog/",
-              :varnish_server => "proxy.fr2.ec2.internal",
-              :varnish_port => node[:varnish][:admin_listen_port]
-  end
-  
-  if node[:chef][:roles].include?('worker') && node[:chef][:roles].include?('blog')
-    directory "#{node[:apache][:docroot]}/blog/wp-content/uploads" do
-      owner 'www-data'
-      group 'www-data'
-      mode 0755
-      recursive true
-      action :create
-    end
-    
-    link "#{node[:app][:app_root]}/current/public/uploads" do
-      to "#{node[:apache][:docroot]}/blog/wp-content/uploads"
-      group 'www-data'
-    end
-  end
-  
+####################################
+#
+# EC2 SETUP
+#
+####################################
+if node[:ec2] && ( node[:chef][:roles].include?('database') || node[:chef][:roles].include?('worker') )
+  include_recipe "ec2"
 end
 
 ####################################
@@ -471,7 +444,15 @@ end
 #
 ####################################
 if (node[:chef][:roles].include?('database') || node[:chef][:roles].include?('worker')) && !node[:chef][:roles].include?('vagrant')
-  
+  directory "#{node[:app][:web_dir]}/apps" do
+    owner node[:capistrano][:deploy_user]
+    group node[:capistrano][:deploy_user]
+    mode 0755
+    action :create
+    recursive true
+  end
+
+
   dir_to_mount = "#{node[:app][:app_root]}/#{node[:rails][:using_shared] ? 'shared' : ''}"
   directory dir_to_mount do
     owner node[:capistrano][:deploy_user]
@@ -491,4 +472,110 @@ if (node[:chef][:roles].include?('database') || node[:chef][:roles].include?('wo
     # Do not execute if its already mounted (ubunutu/linux only)
     not_if "cat /proc/mounts | grep #{dir_to_mount}"
   end
+
+  ["#{node[:app][:web_dir]}/apps/#{node[:app][:name]}", "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/current"].each do |fr_dir|
+    directory fr_dir do
+      owner node[:capistrano][:deploy_user]
+      group node[:capistrano][:deploy_user]
+      mode 0755
+      action :create
+      recursive true
+    end
+  end
+
+  branch_ref = node[:rails][:environment] == 'production' ? 'production' : 'master'
+  git "#{node[:app][:app_root]}/current" do
+    user node[:capistrano][:deploy_user]
+    group node[:capistrano][:deploy_user]
+    repository node[:app][:repo_url]
+    reference branch_ref
+    action :sync
+  end
 end
+
+####################################
+#
+# WORDPRESS/BLOG SETUP
+#
+####################################
+
+if node[:chef][:roles].include?('blog')
+
+  directory node[:app][:blog][:root] do
+    owner 'deploy'
+    group 'deploy'
+    mode 0755
+    recursive true
+  end
+
+  branch = node[:rails][:environment] == "production" ? "production" : "master"
+  git node[:app][:blog][:root] do
+    user "deploy"
+    group "deploy"
+    repository node[:app][:blog][:repo_url]
+    reference branch
+    enable_submodules true
+    action :sync
+  end
+  
+  template "#{node[:app][:blog][:root]}/config/wp-config.yml" do
+    source "wp-config.yml.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables :host           => node[:mysql][:database_server_fqdn], 
+              :port           => node[:mysql][:server_port],
+              :database_name  => node[:wordpress][:database_name],
+              :database_user  => node[:wordpress][:database_user],
+              :password       => node[:wordpress][:database_password],
+              :wordpress_keys => node[:wordpress][:keys]
+  end
+  
+  template "#{node[:app][:blog][:root]}/config/wp-options.local.yml" do
+    source "wp-options.local.yml.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables :app_url => "http://www.#{node[:app][:url]}/blog/",
+              :varnish_server => "proxy.fr2.ec2.internal",
+              :varnish_port => node[:varnish][:admin_listen_port]
+  end
+  
+  if node[:chef][:roles].include?('worker') && node[:chef][:roles].include?('blog')
+    ["#{node[:app][:blog][:root]}/public/blog/wp-content/uploads", "#{node[:app][:app_root]}/public/uploads"].each do |dir|
+      directory dir do
+        owner 'www-data'
+        group 'www-data'
+        mode 0755
+        recursive true
+        action :create
+      end
+    end
+
+    if node[:ec2]
+      directory "/vol/apps/fr2_blog/uploads" do
+        owner 'www-data'
+        group 'www-data'
+        mode 0755
+        recursive true
+        action :create
+      end
+
+      mount "#{node[:app][:blog][:root]}/public/blog/wp-content/uploads" do
+        device "/vol/apps/fr2_blog/uploads"
+        fstype "none"
+        options "bind"
+        action [:enable, :mount]
+        # Do not execute if its already mounted (ubunutu/linux only)
+        not_if "cat /proc/mounts | grep #{node[:app][:blog][:root]}/public/blog/wp-content/uploads"
+      end
+    end
+    
+    link "#{node[:app][:app_root]}/current/public/uploads" do
+      to "#{node[:app][:blog][:root]}/public/blog/wp-content/uploads"
+      group 'www-data'
+    end
+  end
+  
+end
+
