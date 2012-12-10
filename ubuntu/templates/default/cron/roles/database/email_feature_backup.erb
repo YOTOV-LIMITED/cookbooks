@@ -2,6 +2,6 @@
 database    = "fr2_production"
 tables      = %w(entry_emails subscriptions mailing_lists)
 backup_dir  = "/opt/backups"
-backup_file = "email_feature_backup_#{Time.now.strftime('%Y_%m_%d_%T').gsub(':','_')}.sql"
+backup_file = "email_feature_backup_#{Time.now.strftime('%H_%M').gsub(':','_')}.sql"
 
-`mysqldump -u<%=@mysql_user%> -p<%=@mysql_passwd%> #{database} #{tables.join(' ')}  --opt --quick > #{backup_dir}/#{backup_file} && <%@s3sync_cmd%> put backups.internal.federalregister.gov:mysql/<%=@server_env%>/#{backup_file} #{backup_dir}/#{backup_file}`
+`mysqldump -u<%=@mysql_user%> -p<%=@mysql_passwd%> #{database} #{tables.join(' ')}  --opt --quick > #{backup_dir}/#{backup_file} && <%=@s3sync_cmd%> put backups.internal.federalregister.gov:mysql/<%=@server_env%>/#{backup_file} #{backup_dir}/#{backup_file}`

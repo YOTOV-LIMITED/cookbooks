@@ -10,7 +10,7 @@
 0 10 	* * *   root    /usr/local/sbin/aws dsnap | grep <%=@ebs_volume_id%> | sort -r -k 5  | sed 1,10d | awk '{print "Deleting snapshot: " $2 " Dated: " $8}; system("/usr/local/sbin/aws delsnap " $2)'  >> <%=@log%>  2>&1
 
 # Backup our more volatile tables more often
-23 * 	* * *   root   ruby /opt/backups/scripts/email_feature_backup.rb >> <%=@log%>  2>&1
-27 * 	* * *   root   ruby /opt/backups/scripts/wordpress_backup.rb >> <%=@log%>  2>&1
-32 * 	* * *   root   ruby /opt/backups/scripts/my_fr_backup.rb >> <%=@log%>  2>&1
+5,20,35,50 * 	* * *   root   ruby /opt/backups/scripts/email_feature_backup.rb >> <%=@log%>  2>&1
+6,21,36,51 * 	* * *   root   ruby /opt/backups/scripts/wordpress_backup.rb >> <%=@log%>  2>&1
+7,22,37,52 * 	* * *   root   ruby /opt/backups/scripts/my_fr_backup.rb >> <%=@log%>  2>&1
 
