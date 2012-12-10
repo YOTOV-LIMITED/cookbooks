@@ -175,9 +175,14 @@ sub vcl_recv {
     <% end %>
 
     <% if @node[:varnish][:iodocs_proxy_host] %>
-    } else if (req.url ~ "^/developers/api/v1") {
+    } else if (req.url ~ "^/developers/api") {
       set req.backend = iodocs_server;
-      return (lookup);
+      set req.url = regsub(
+        req.url,
+        "^/developers/api",
+        ""
+      );
+      return (pass);
     <% end %>
 
     } else {
