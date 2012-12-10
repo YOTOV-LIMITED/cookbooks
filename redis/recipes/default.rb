@@ -35,7 +35,7 @@ bash "Install Redis #{node[:redis][:version]} from source" do
   tar xvzf redis-#{node[:redis][:version]}.tar.gz
   cd redis-#{node[:redis][:version]}
   make
-  cp -f redis-server "#{node[:redis][:bin_path]}/" && cp redis-cli "#{node[:redis][:bin_path]}/"
+  cp -f src/redis-server "#{node[:redis][:bin_path]}/" && cp src/redis-cli "#{node[:redis][:bin_path]}/"
   EOH
 
   not_if do

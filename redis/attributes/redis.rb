@@ -1,4 +1,4 @@
-set_unless[:redis][:version]  = "2.0.2"
+set_unless[:redis][:version]  = "2.4.17"
 set_unless[:redis][:source_url] = "http://redis.googlecode.com/files/redis-#{redis[:version]}"
 set_unless[:redis][:bin_path] = "/usr/local/bin"
 
