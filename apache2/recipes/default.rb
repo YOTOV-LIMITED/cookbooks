@@ -150,11 +150,12 @@ template "charset" do
   notifies :restart, resources(:service => "apache2")
 end
 
+listen_ports = node[:chef][:roles].include?('worker') ? node[:apache][:worker_listen_ports] : node[:apache][:listen_ports]
 template "#{node[:apache][:dir]}/ports.conf" do
   source "ports.conf.erb"
   group "root"
   owner "root"
-  variables :apache_listen_ports => node[:apache][:listen_ports]
+  variables :apache_listen_ports => listen_ports
   mode 0644
   notifies :restart, resources(:service => "apache2")
 end
