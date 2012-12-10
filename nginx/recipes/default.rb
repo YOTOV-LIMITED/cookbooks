@@ -92,8 +92,13 @@ end
 
 # add resque logs
 if node[:chef][:roles].include?('resque_proxy')
-  directory "/var/log/nginx/resque.fr2.criticaljuncture.org" do
+  directory "/var/log/nginx/resque.#{node[:app][:url]}" do
     action :create
     recursive true
   end
+end
+
+# disable default vhost
+nginx_site "default" do
+  enable false
 end
