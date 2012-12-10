@@ -6,7 +6,7 @@
   
   <Directory <%= @docroot %>>
     Options FollowSymLinks
-    <%- if @node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" -%>
+    <%- if node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" -%>
     AllowOverride all
     <%- else -%>
     AllowOverride None
@@ -14,7 +14,7 @@
     Order allow,deny
     Allow from all
     
-    <%- if @node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" -%>
+    <%- if node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" -%>
     ErrorDocument 403 /blog/errors/403.html
     ErrorDocument 404 /blog/errors/404.html
     ErrorDocument 500 /blog/errors/500.html
@@ -28,8 +28,8 @@
     AllowOverride None
   </Directory>
   
-  <% if @node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" -%>
-  <Directory <%= @node[:apache][:docroot] %>/blog/wp-admin>
+  <% if node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" -%>
+  <Directory <%= node[:apache][:docroot] %>/blog/wp-admin>
     AuthType Basic
     AuthName "Restricted Access"
     AuthUserFile /etc/apache2/passwd/passwords
@@ -62,7 +62,7 @@
   RewriteCond %{SCRIPT_FILENAME} !maintenance.html
   RewriteRule ^.*$ /system/maintenance.html [L]
   
-  <% if @node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" %>
+  <% if node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" %>
   # wordpress blog  
   #RewriteRule ^blog\/search(.*) /index.php [P]
 
