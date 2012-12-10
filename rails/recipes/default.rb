@@ -30,6 +30,7 @@ include_recipe "rails::logrotate"
   end
 end
 
+
 directory "#{node[:app][:web_dir]}/apps/#{node[:app][:name]}/current/public/articles" do
   owner "#{node[:capistrano][:deploy_user]}"
   group "#{node[:capistrano][:deploy_user]}"
@@ -47,23 +48,32 @@ if node[:chef][:roles].include?('app') || node[:chef][:roles].include?('worker')
               :database_name => node[:mysql][:database_name],
               :password      => node[:mysql][:server_root_password]
     source "database/app_server.mysql.yml.erb"
-    owner "#{node[:capistrano][:deploy_user]}"
-    group "#{node[:capistrano][:deploy_user]}"
+    owner node[:capistrano][:deploy_user]
+    group node[:capistrano][:deploy_user]
     mode 0644
   end
 
   # MY FR #
-  [ node[:app][:my_fr_root], "#{node[:app][:my_fr_root]}/config" ].each do |my_fr_dir|
+  [ node[:app][:my_fr][:root] ].each do |my_fr_dir|
     directory my_fr_dir do
-      owner "#{node[:capistrano][:deploy_user]}"
-      group "#{node[:capistrano][:deploy_user]}"
+      owner node[:capistrano][:deploy_user]
+      group node[:capistrano][:deploy_user]
       mode 0755
       action :create
       recursive true
     end
   end
 
-  template "#{node[:app][:my_fr_root]}/config/database.yml" do
+  branch_ref = node[:rails][:environment] == 'production' ? 'production' : 'master'
+  git "#{node[:app][:my_fr][:root]}" do
+    user node[:capistrano][:deploy_user]
+    group node[:capistrano][:deploy_user]
+    repository node[:app][:my_fr][:repo_url]
+    reference branch_ref
+    action :sync
+  end
+
+  template "#{node[:app][:my_fr][:root]}/config/database.yml" do
     variables :environment   => node[:rails][:environment],
               :adapter       => "mysql2",
               :host          => node[:mysql][:database_server_fqdn], 
@@ -128,7 +138,7 @@ unless node[:chef][:roles].include?('vagrant')
   end
 
   # FR2, MY FR #
-  [ "#{node[:app][:app_root]}/shared", node[:app][:my_fr_root] ].each do |app_root|
+  [ "#{node[:app][:app_root]}/shared", node[:app][:my_fr][:root] ].each do |app_root|
     execute "Get private config file sendgrid.yml" do
       cwd "#{app_root}/config"
       command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:sendgrid.yml sendgrid.yml"
@@ -146,7 +156,7 @@ unless node[:chef][:roles].include?('vagrant')
   end
   # MY FR #
   execute "Get MY FR private config file secrets.yml" do
-    cwd "#{node[:app][:my_fr_root]}/config"
+    cwd "#{node[:app][:my_fr][:root]}/config"
     command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:my_fr2_secrets.yml secrets.yml"
     user "#{node[:capistrano][:deploy_user]}"
     group "#{node[:capistrano][:deploy_user]}"
