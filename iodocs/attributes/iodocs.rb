@@ -16,11 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-default node[:iodocs][:app_path] = "/var/www/apps/iodocs"
-default node[:iodocs][:repo_url] = "git://github.com/mashery/iodocs.git"
-default node[:iodocs][:address]  = "0.0.0.0"
-default node[:iodocs][:port]     = 3000
-default node[:iodocs][:title]    = "I/O Docs - http://github.com/mashery/iodocs"
-default node[:iodocs][:debug]    = false
-default node[:iodocs][:session_secret] = "12345"
-default node[:iodocs][:redis_database] = 0
+default[:iodocs][:app_path] = "/var/www/apps/iodocs"
+default[:iodocs][:repo_url] = "git://github.com/mashery/iodocs.git"
+default[:iodocs][:address]  = "0.0.0.0"
+default[:iodocs][:port]     = 3000
+default[:iodocs][:title]    = "I/O Docs - http://github.com/mashery/iodocs"
+default[:iodocs][:debug]    = false
+default[:iodocs][:session_secret] = "12345"
+default[:iodocs][:redis_database] = 0

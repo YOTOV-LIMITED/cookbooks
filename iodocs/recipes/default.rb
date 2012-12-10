@@ -16,11 +16,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include_recipe "nodejs"
+
 git node[:iodocs][:app_path] do
+  user "deploy"
+  group "deploy"
   repository node[:iodocs][:repo_url]
   reference "master"
-  action :checkout
+  action :sync
 end
+
+bash "NPM install iodocs" do
+  user "root"
+  cwd node[:iodocs][:app_path]
+  code <<-EOH
+    npm install
+    EOH
+
+  not_if do
+    system("npm list | grep -q iodocs")
+  end
+end
+
+#set up variables for service / upstart script
+service_name = "iodocs"
+service_user = "deploy"
+service_user_home = (%x[cat /etc/passwd | grep #{service_user} | cut -d":" -f6]).chomp
+
+# Create a node service for this program with upstart
+template "/etc/init/#{service_name}.conf" do
+  source "iodocs.upstart.erb"
+  variables :name   => "iodocs",
+            :script => "#{node[:iodocs][:app_path]}/app.js",
+            :user   => service_user,
+            :user_home => service_user_home,
+            :args => ""
+end
+
+file "/var/log/#{service_name}.log" do
+  owner service_user
+  group "root"
+  mode 0644
+  action :create
+end
+
+service service_name do
+  provider Chef::Provider::Service::Upstart
+  action [:enable, :start]
+end
+
 
 template "#{node[:iodocs][:app_path]}/config.json" do
   source "config.json.erb"
@@ -35,4 +79,6 @@ template "#{node[:iodocs][:app_path]}/config.json" do
             :redis_database => node[:iodocs][:redis_database]
     
   mode "0644"
+
+  notifies :restart, resources(:service => service_name)
 end
