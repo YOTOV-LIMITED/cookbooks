@@ -26,6 +26,13 @@ include_recipe "php::module_gd"
 include_recipe "php::module_pgsql"
 include_recipe "php::pear"
 
+directory value_for_platform([ "centos", "redhat", "suse" ] => {"default" => "/etc"}, "default" => "/etc/php5/apache2") do
+  owner "root"
+  group "root"
+  action :create
+  recursive true
+end
+
 remote_file value_for_platform([ "centos", "redhat", "suse" ] => {"default" => "/etc/php.ini"}, "default" => "/etc/php5/apache2/php.ini") do
   source "apache2-php5.ini"
   owner "root"
