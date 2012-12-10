@@ -4,8 +4,8 @@ when "debian","ubuntu"
   default[:varnish][:default] = "/etc/default/varnish"
 end
 
-default[:varnish][:version] = '2.1.2'
-default[:varnish][:url]     = "http://sourceforge.net/projects/varnish/files/varnish/#{node[:varnish][:version]}/varnish-#{node[:varnish][:version]}.tar.gz/download"
+default[:varnish][:version] = '2.1.5'
+default[:varnish][:url]     = "http://repo.varnish-cache.org/source/varnish-#{node[:varnish][:version]}.tar.gz"
 
 
 # default options

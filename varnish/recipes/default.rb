@@ -59,7 +59,7 @@ bash "Install Varnish" do
     make install
     ldconfig
   EOH
-  not_if { ::File.directory?("/usr/local/varnish-#{node[:varnish][:version]}") }
+  #not_if { ::File.directory?("/usr/local/src/varnish-#{node[:varnish][:version]}") }
 end
 
 template "/etc/init.d/varnish" do
