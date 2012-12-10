@@ -12,3 +12,5 @@ PassengerMaxRequests <%= @node[:passenger_enterprise][:max_requests] %>
 PassengerMaxPoolSize <%= @node[:passenger_enterprise][:max_pool_size] %>
 # Turn on/off global cueing
 PassengerUseGlobalQueue <%= @node[:passenger_enterprise][:global_cue] %>
+# Don't show error pages in production
+PassengerFriendlyErrorPages off
