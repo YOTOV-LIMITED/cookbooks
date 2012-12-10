@@ -1,10 +1,11 @@
-set_unless[:nodejs][:source_url] = "git://github.com/ry/node.git"
-set_unless[:nodejs][:source_path] = "/usr/local/src"
-set_unless[:nodejs][:version] = "0.2.2"
+default[:nodejs][:version] = "v0.8.9"
+default[:nodejs][:source_url] = "http://nodejs.org/dist/#{node[:nodejs][:version]}/node-#{node[:nodejs][:version]}-linux-x64.tar.gz"
+default[:nodejs][:source_path] = "/usr/local/src"
 
 # node package manager
-set_unless[:nodejs][:install_npm] = "yes"
+default[:nodejs][:install_npm] = "yes"
 
 if nodejs[:install_npm] == "yes"
-  set_unless[:nodejs][:npm_packages] = ["htmlparser", "jsdom"]
+  # and array of package hashes, {:name => "forever", :global => true}
+  default[:nodejs][:npm][:packages] = []
 end

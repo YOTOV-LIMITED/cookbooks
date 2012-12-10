@@ -5,6 +5,7 @@
 # Description:: "Installs and configures Node.js"
 # Version:: "0.1"
 # Copyright 2010, Critical Juncture
+# Providers and upstart template courtesy of Tikibooth Limited, https://github.com/digitalbutter/cookbook-node
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,21 +23,23 @@
 directory node[:nodejs][:source_path] do
   mode 0755
   action :create
-  recursuve true
+  recursive true
 end
 
-git node[:nodejs][:source_path] do
-  repository node[:nodejs][:source_url]
-  reference "v#{node[:nodejs][:version]}"
-  action :sync
+remote_file "/usr/local/src/node-#{node[:nodejs][:version]}-linux-x64.tar.gz" do
+  source "#{node[:nodejs][:source_url]}"
+  not_if { ::File.exists?("/usr/local/src/node-#{node[:nodejs][:version]}-linux-x64.tar.gz") }
 end
 
-bash "Install NodeJS #{node[:redis][:version]} from git source" do
-  cwd "#{node[:nodejs][:source_path]}/node"
+bash "Install NodeJS #{node[:nodejs][:version]} from precompiled binaries" do
+  cwd node[:nodejs][:source_path]
   code <<-EOH
-  ./configure
-  make
-  make install
+  tar -zxvf node-#{node[:nodejs][:version]}-linux-x64.tar.gz
+  chown -R root:root /usr/local/src/node-#{node[:nodejs][:version]}-linux-x64
+  cd node-#{node[:nodejs][:version]}-linux-x64
+  cp bin/node /usr/local/bin/
+  cp bin/node-waf /usr/local/bin/
+  cp bin/npm /usr/local/bin/
   EOH
 
   not_if do
@@ -47,14 +50,25 @@ end
 
 if node[:nodejs][:install_npm] == "yes"
   bash "Install Node Package Manager" do
-  cwd node[:nodejs][:source_path]
-  code <<-EOH
-  curl http://npmjs.org/install.sh | sh
-  EOH
+    cwd node[:nodejs][:source_path]
+    user "root"
+    code <<-EOH
+      curl -o /tmp/install.sh https://npmjs.org/install.sh 
+      clean=no sh /tmp/install.sh
+      EOH
   end
   
-  not_if do
-    ::File.exists?("/usr/local/bin/npm") &&
-    system("/usr/local/bin/npm -v | grep -q '#{node[:nodejs][:version]}'")
+  node[:nodejs][:npm][:packages].each do |npm_package|
+    bash "Install NPM package #{npm_package[:name]}" do
+      code <<-EOH
+        npm install #{npm_package[:name]} #{npm_package[:global] == true ? '-g' : ''}
+        EOH
+
+      not_if do
+        system("npm list #{npm_package[:global] == true ? '-g' : ''} | grep -q #{npm_package[:name]}")
+      end
+    end
   end
 end
+
+
