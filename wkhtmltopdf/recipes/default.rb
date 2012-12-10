@@ -41,33 +41,55 @@ git node[:wkhtmltopdf_qt][:path] do
   action :sync
 end
 
-# script "install wkhtmltopdf-qt" do
-#   interpreter "bash"
-#   user "root"
-#   cwd node[:wkhtmltopdf_qt][:path]
-#   #not_if do File.exists?(node[:wkhtmltopdf_qt][:path]) end
-#   code <<-EOH
-#         ./configure -nomake tools,examples,demos,docs,translations -opensource -prefix ../wkqt
-#         make -j3
-#         make install
-#         EOH
-# end
+ script "install wkhtmltopdf-qt" do
+   interpreter "bash"
+   user "root"
+   cwd node[:wkhtmltopdf_qt][:path]
+   code <<-EOH
+         ./configure -nomake tools,examples,demos,docs,translations -opensource -confirm-license -prefix ../wkqt
+         make -j3
+         make install
+         EOH
+
+   not_if do 
+     File.exists?('/usr/local/bin/wkhtmltopdf')
+   end
+ end
 
 git node[:wkhtmltopdf][:path] do
   repository "git://github.com/antialize/wkhtmltopdf.git"
   reference "master"
-  action :checkout
+  action :sync
 end
 
 
-# script "install wkhtmltopdf" do
-#   interpreter "bash"
-#   user "root"
-#   cwd node[:wkhtmltopdf][:path]
-#   #not_if do File.exists?(node[:wkhtmltopdf][:path]) end
-#   code <<-EOH
-#           ../wkqt/bin/qmake
-#           make -j3
-#           make install
-#           EOH
-# end
+script "install wkhtmltopdf" do
+  interpreter "bash"
+  user "root"
+  cwd node[:wkhtmltopdf][:path]
+  code <<-EOH
+         ../wkqt/bin/qmake
+         make -j3
+         make install
+         EOH
+
+  not_if do 
+    File.exists?('/usr/local/bin/wkhtmltopdf')
+  end
+end
+
+execute "move wkhtmtopdf binary to /usr/local/bin" do
+  command "mv /bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf"
+
+  not_if do 
+    File.exists?('/usr/local/bin/wkhtmltopdf')
+  end
+end
+
+execute "move wkhtmltoimage binary to /usr/local/bin" do
+  command "mv /bin/wkhtmltoimage /usr/local/bin/wkhtmltoimage"
+
+  not_if do 
+    File.exists?('/usr/local/bin/wkhtmltoimage')
+  end
+end
