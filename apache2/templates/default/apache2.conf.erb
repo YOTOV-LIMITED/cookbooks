@@ -222,13 +222,6 @@ LogFormat "%h \"%{X-Forwarded-For}i\" %t %>s %I %b %D \"%U\" \"%q\" \"%{User-age
 #    ErrorDocument 503 /error/HTTP_SERVICE_UNAVAILABLE.html.var
 #    ErrorDocument 506 /error/HTTP_VARIANT_ALSO_VARIES.html.var
 
-<% if @node[:apache][:my_fr2_port] %>
-# my_fr2 port
-Listen <%= @node[:apache][:my_fr2_port] %>
-
-# shared server using named virtual hosts
-NameVirtualHost *:8080
-<% end %>
 
 # Include generic snippets of statements
 Include <%= @node[:apache][:dir] %>/conf.d/
