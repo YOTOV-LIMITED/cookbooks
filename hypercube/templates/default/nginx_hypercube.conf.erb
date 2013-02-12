@@ -1,0 +1,21 @@
+server {
+  listen   <%= node[:hypercube][:port] %>;
+    
+  server_name <%= @domain %>;
+
+  access_log /var/log/nginx/<%= @domain %>/access.log;
+  error_log /var/log/nginx/<%= @domain %>/error.log;
+
+  location ^/1.0/ {
+    proxy_pass             <%= @cube_host %>:<%= @cube_port %>;
+    proxy_set_header       Host $host;
+    proxy_set_header       X-Real-IP $remote_addr;
+    proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header       X-Client-Verify SUCCESS;
+  }
+
+  location / {
+    # doc root
+    root <%= @node[:hypercube][:app_path] %>;
+  }
+}
