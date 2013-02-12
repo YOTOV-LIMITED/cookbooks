@@ -1,0 +1,20 @@
+description "node.js <%= @name %> server"
+
+start on started mountall
+stop on shutdown
+
+expect daemon
+
+script
+    export HOME="<%= @user_home %>"
+    exec sudo -u <%= @user %> forever start <%= @script %>  <%= @args %> >> /var/log/<%= @name %>.log 2>&1
+end script
+
+post-start script
+    echo "`date`: <%= @name %> (re)started" >> /var/log/<%= @name %>.log 2>&1
+end script
+
+pre-stop script
+  export HOME="<%= @user_home %>"
+  exec sudo -u <%= @user %> forever stop <%= @script %> >> /var/log/<%= @name %>.log 2>&1
+end script
