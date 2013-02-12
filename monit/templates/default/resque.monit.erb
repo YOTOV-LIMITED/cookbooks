@@ -1,0 +1,8 @@
+<% @options[:queue_count].times do |i| %>
+  check process resque_worker_<%= @options[:queue] %>_<%= i %>
+  with pidfile <%= @options[:app_path] %>/tmp/pids/resque_worker_<%= @options[:queue] %>_<%= i %>.pid
+  start program = "/usr/bin/env HOME=/home/<%= @user %> /bin/sh -l -c 'cd <%= @options[:app_path] %>; nohup bundle exec rake environment resque:work RAILS_ENV=<%= @rails_env %> QUEUE=<%= @options[:queue] %> INTERVAL=<%= @options[:interval] %> VERBOSE=1 PIDFILE=<%= @options[:app_path] %>/tmp/pids/resque_worker_<%= @options[:queue] %>_<%= i %>.pid >> <%= @options[:app_path] %>/log/resque_worker_<%= @options[:queue] %>.log 2>&1'" as uid <%= @user %> and gid <%= @group %>
+  stop program = "/bin/sh -c 'kill -3 $(cat <%= @options[:app_path] %>/tmp/pids/resque_worker_<%= @options[:queue] %>_<% i %>.pid) && rm -f <%= @options[:app_path] %>/tmp/pids/resque_worker_<%= @options[:queue] %>_<% i %>.pid; exit 0;'"
+  if totalmem is greater than <%= @options[:total_mem] %> for <%= @options[:total_mem_cycles] %> cycles then restart  # eating up memory?
+  group resque_workers
+<% end %>
