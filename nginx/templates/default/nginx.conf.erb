@@ -419,5 +419,5 @@ http {
     
 
   include <%= @node[:nginx][:dir] %>/conf.d/*.conf;
-  #include <%= @node[:nginx][:dir] %>/sites-enabled/*;
+  include <%= @node[:nginx][:dir] %>/sites-enabled/*;
 }
