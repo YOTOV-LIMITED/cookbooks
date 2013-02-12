@@ -1,0 +1,6 @@
+# WRITE TO CUBE
+<Plugin write_http>
+  <URL "http://<%= @cube_server_address %>:<%= @cube_server_port %>/collectd">
+    Format "JSON"
+  </URL>
+</Plugin>
