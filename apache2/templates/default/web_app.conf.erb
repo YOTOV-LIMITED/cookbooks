@@ -29,7 +29,7 @@
   </Directory>
   
   <% if node[:chef][:roles].include?('blog') && @docroot == "/var/www/apps/fr2_blog/public" -%>
-  <Directory <%= node[:apache][:docroot] %>/blog/wp-admin>
+  <Directory <%= @docroot %>/blog/wp-admin>
     AuthType Basic
     AuthName "Restricted Access"
     AuthUserFile /etc/apache2/passwd/passwords
