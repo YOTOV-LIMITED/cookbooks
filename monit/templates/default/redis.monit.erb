@@ -1,7 +1,7 @@
 check process redis-server
     with pidfile "/var/run/redis.pid"
     start program = "/usr/local/bin/redis-server /etc/redis/redis.conf"
-    stop program = "echo SHUTDOWN | /usr/local/bin/redis-cli"
+    stop program = "/bin/bash -c 'echo SHUTDOWN | /usr/local/bin/redis-cli'"
     if totalmem > <%= @options[:total_mem] %> for <%= @options[:total_mem_cycles] %> cycles then restart
     if children > <%= @options[:max_children] %> for <%= @options[:max_children_cycles] %> cycles then stop
     if cpu usage > <%= @options[:max_cpu_percent] %> for <%= @options[:max_cpu_percent_cycles] %> cycles then restart
