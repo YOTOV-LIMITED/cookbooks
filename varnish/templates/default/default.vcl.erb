@@ -150,7 +150,7 @@ sub vcl_recv {
       if (req.url ~ "^/my/special/user_utils" && ( req.http.Cookie ~ "document_numbers" || req.http.Cookie ~ "_my_fr2_session") ) {
         return(pass);
       }
-    } else if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/page-images|/articles/xml|/public-inspection/raw_text|/regulations/html|/uploads)|/generated_files|/index/pdf") {
+    } else if (req.url ~ "^(/images|/javascripts|/flash|/stylesheets|/sitemap|/articles/html|/articles/page-images|/articles/text|/articles/xml|/public-inspection/raw_text|/regulations/html|/uploads)|/generated_files|/index/pdf") {
       set req.backend = static_server;
 
       # Fetch from cache unless explicitly skipping cache
