@@ -18,6 +18,11 @@ backend <%= server[:alias] %> {
   }
   <% end %>
 }
+
+backend <%= server[:alias] %>_status {
+  .host = "<%= server[:fqdn] %>";
+  .port = "<%= @node[:varnish][:app_proxy_port] %>";
+}
 <% end %>
 
 <% @node[:varnish][:my_fr2_proxy_servers].each do |server| %>
@@ -182,6 +187,13 @@ sub vcl_recv {
         "^/developers/api",
         ""
       );
+      return (pass);
+    <% end %>
+
+    <% @node[:varnish][:app_proxy_servers].each_with_index do |server, index| %>
+    } else if (req.url ~ "^/status/<%= index %>") {
+      set req.backend = app_server_<%= index %>_status;
+      set req.url = "/status";
       return (pass);
     <% end %>
 
