@@ -281,7 +281,7 @@ sub vcl_hash {
     }
 
     # Hash differently based on presence of expect_logged_in cookie.
-    if( req.url ~ "^/my/special/navigation" && req.http.Cookie ~ "expect_logged_in=1" ) {
+    if( req.url ~ "^/my/special/navigation" && req.http.Cookie ~ "expect_signed_in=1" ) {
         # add this fact to the hash
         set req.hash += "user logged in"; 
     }
