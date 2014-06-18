@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 database    = "fr2_production"
-tables      = %w(entry_emails subscriptions mailing_lists)
+tables      = %w(entry_emails)
 backup_dir  = "/opt/backups"
 backup_file = "email_feature_backup_#{Time.now.strftime('%H_%M').gsub(':','_')}.sql"
 

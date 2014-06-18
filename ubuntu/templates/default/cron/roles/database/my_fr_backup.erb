@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 database    = "my_fr2_production"
-tables      = %w(clippings folders users)
 backup_dir  = "/opt/backups"
 backup_file = "my_fr2_user_data_backup_#{Time.now.strftime('%H_%M').gsub(':','_')}.sql"
 
-`mysqldump -u<%=@mysql_user%> -p<%=@mysql_passwd%> #{database} #{tables.join(' ')}  --opt --quick > #{backup_dir}/#{backup_file} && <%=@s3sync_cmd%> put backups.internal.federalregister.gov:mysql/<%=@server_env%>/#{backup_file} #{backup_dir}/#{backup_file}`
+`mysqldump -u<%=@mysql_user%> -p<%=@mysql_passwd%> #{database} --opt --quick > #{backup_dir}/#{backup_file} && <%=@s3sync_cmd%> put backups.internal.federalregister.gov:mysql/<%=@server_env%>/#{backup_file} #{backup_dir}/#{backup_file}`
 
