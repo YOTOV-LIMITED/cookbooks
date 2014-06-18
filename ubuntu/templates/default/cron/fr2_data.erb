@@ -27,7 +27,7 @@
 
 # Reindex the entire content (collapsing delta indexes back into main index)
 # runs once a week on Sunday at 3AM EDT
-0 7 	* * 7	<%=@run_user%>	cd <%=@apache_web_dir%>/apps/<%=@app_name%>/current && bundle exec rake RAILS_ENV=<%=@rails_env%> PATH=/opt/ruby-enterprise/bin:$PATH remote:sphinx:reindex 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/weekly_sphinx_reindex.log
+0 7 	* * 7	<%=@run_user%>	/usr/local/bin/indexer <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/config/<%=@rails_env%>.sphinx.conf --rotate --all 2>&1 | sed "s/^/[$(date)] /" >> <%=@apache_web_dir%>/apps/<%=@app_name%>/shared/log/weekly_sphinx_reindex.log
 
 # Import public inspection documents
 # runs every 5 minutes from 7AM EDT until 7PM Monday-Saturday
